@@ -66,11 +66,14 @@ Sync works over a per-user doc (`users/{uid}/data/main`), merges by last-write-w
 
 ## Deployment
 
-- **GitHub Pages (repo included)** — push to `main`; the workflow in
-  `.github/workflows/deploy-pages.yml` builds and publishes automatically. Enable it once in:
-  **Settings → Pages → Source: "GitHub Actions**. Live at `https://<you>.github.io/keepNote/`.
-- **Netlify / Vercel** — build command `npm run build`, output dir `dist/keep-note/browser`
-  (hosts at the site root, no base-path needed).
+- **Netlify (primary)** — repo includes `netlify.toml` (build `npm run build`,
+  publish `dist/keep-note/browser`, SPA redirect). Deploy manually:
+  ```bash
+  netlify deploy --prod         # build locally then push dist
+  ```
+  or connect the GitHub repo in the Netlify dashboard for auto-deploys on push.
+- **GitHub Pages** — build with `npm run build -- --base-href=/keepNote/` and publish
+  `dist/keep-note/browser`, or
 - **Firebase Hosting** — pairs well with the sync feature:
   ```bash
   npm i -g firebase-tools
