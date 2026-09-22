@@ -1,0 +1,247 @@
+:host {
+  display: block;
+  break-inside: avoid;
+  margin-bottom: 14px;
+  width: 100%;
+}
+
+.note-card {
+  position: relative;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px 12px;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
+  animation: fadeSlideUp 0.28s ease both;
+  outline: none;
+}
+
+.note-card:hover,
+.note-card:focus-visible {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+.note-card.over {
+  box-shadow: 0 0 0 2px var(--accent), var(--shadow-md);
+}
+
+.note-card.selecting {
+  opacity: 0.86;
+}
+.note-card.selecting:hover {
+  opacity: 1;
+}
+.note-card.selected {
+  box-shadow: 0 0 0 2px var(--accent), var(--shadow-md);
+}
+
+.card-inner {
+  padding-bottom: 4px;
+  word-break: break-word;
+  white-space: pre-wrap;
+}
+
+.card-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text, #202124);
+  margin-bottom: 4px;
+  line-height: 1.4;
+  padding-right: 22px;
+}
+
+.card-body {
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--text-2, #3c4043);
+  white-space: pre-wrap;
+}
+
+.card-labels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.chip {
+  background: rgba(127, 127, 127, 0.12);
+  border-color: transparent;
+  cursor: default;
+}
+
+.pin-flag {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  color: var(--accent);
+  width: 18px;
+  height: 18px;
+}
+.pin-flag svg {
+  width: 18px;
+  height: 18px;
+}
+
+.reminder-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border-radius: 999px;
+  padding: 4px 10px;
+}
+.reminder-badge svg {
+  width: 14px;
+  height: 14px;
+}
+
+.select-box {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  color: var(--accent);
+  z-index: 2;
+}
+.select-box svg {
+  width: 22px;
+  height: 22px;
+}
+.note-card.selecting .card-title {
+  padding-left: 26px;
+}
+
+/* Checklist */
+.checklist {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 2px;
+}
+
+.todo-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 0;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--text, #202124);
+}
+.todo-check {
+  display: inline-flex;
+  align-items: center;
+  color: var(--text-2, #3c4043);
+  flex-shrink: 0;
+}
+.todo-check svg {
+  width: 19px;
+  height: 19px;
+}
+.todo-check.done {
+  color: var(--success);
+}
+.done-text {
+  text-decoration: line-through;
+  color: var(--text-3);
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 2px;
+  margin-top: 8px;
+  padding-top: 6px;
+  border-top: 1px solid transparent;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s ease;
+}
+
+.note-card:hover .toolbar,
+.note-card:focus-within .toolbar,
+.note-card.palette-open .toolbar {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.toolbar .icon-btn {
+  width: 34px;
+  height: 34px;
+}
+.toolbar .icon-btn svg {
+  width: 19px;
+  height: 19px;
+}
+
+.toolbar .icon-btn.danger:hover {
+  color: var(--danger);
+  background: var(--danger-soft);
+}
+
+.palette-pop {
+  margin-top: 10px;
+  padding: 8px 4px 4px;
+  border-top: 1px solid var(--border);
+}
+
+.progress {
+  margin-top: 8px;
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(127, 127, 127, 0.25);
+  overflow: hidden;
+}
+.progress-bar {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--accent), #b16cff);
+  transition: width 0.3s ease;
+}
+
+.note-card.colored {
+  border-color: rgba(0, 0, 0, 0.06);
+}
+.note-card.colored .card-title,
+.note-card.colored .todo-row {
+  color: #202124;
+}
+.note-card.colored .card-body {
+  color: #3c4043;
+}
+.note-card.colored .icon-btn {
+  color: #3c4043;
+}
+.note-card.colored .icon-btn:hover {
+  background: rgba(0, 0, 0, 0.08);
+  color: #111;
+}
+.note-card.colored .chip {
+  background: rgba(0, 0, 0, 0.08);
+  color: #2a2d31;
+}
+.note-card.colored .pin-flag {
+  color: #202124;
+}
+.note-card.colored .todo-check {
+  color: #3c4043;
+}
+.note-card.colored .done-text {
+  color: rgba(0, 0, 0, 0.45);
+}
+.note-card.colored .progress {
+  background: rgba(0, 0, 0, 0.18);
+}
+.note-card.colored .reminder-badge {
+  color: #202124;
+  background: rgba(0, 0, 0, 0.08);
+}

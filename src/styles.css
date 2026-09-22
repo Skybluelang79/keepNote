@@ -1,0 +1,302 @@
+/* ==========================================================================
+   KeepNote — Global design system
+   ========================================================================== */
+
+:root {
+  --font: 'Inter', 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif;
+
+  --bg: #f6f8fb;
+  --surface: #ffffff;
+  --surface-2: #eef1f5;
+  --surface-3: #ffffff;
+  --border: #e3e7ee;
+  --text: #1c2534;
+  --text-2: #5b6472;
+  --text-3: #9aa3b2;
+
+  --accent: #7c4dff;
+  --accent-strong: #6a3df0;
+  --accent-soft: rgba(124, 77, 255, 0.12);
+  --accent-contrast: #ffffff;
+  --danger: #e5484d;
+  --danger-soft: rgba(229, 72, 77, 0.12);
+  --success: #30a46c;
+  --warning: #f5a623;
+
+  --header-bg: rgba(255, 255, 255, 0.86);
+  --shadow-sm: 0 1px 2px rgba(18, 26, 40, 0.05), 0 1px 3px rgba(18, 26, 40, 0.08);
+  --shadow-md: 0 4px 6px -2px rgba(18, 26, 40, 0.07), 0 2px 4px -2px rgba(18, 26, 40, 0.06);
+  --shadow-lg: 0 16px 32px -8px rgba(18, 26, 40, 0.16), 0 6px 12px -6px rgba(18, 26, 40, 0.1);
+  --shadow-accent: 0 8px 20px -6px rgba(124, 77, 255, 0.45);
+
+  --radius-sm: 8px;
+  --radius: 14px;
+  --radius-lg: 20px;
+
+  --header-h: 64px;
+  --sidebar-w: 268px;
+  --sidebar-w-collapsed: 0px;
+
+  color-scheme: light;
+}
+
+[data-theme='dark'] {
+  --bg: #141519;
+  --surface: #1f2127;
+  --surface-2: #2a2d34;
+  --surface-3: #181a1f;
+  --border: #2e3139;
+  --text: #ebedf2;
+  --text-2: #a5abb6;
+  --text-3: #6d747f;
+
+  --accent: #a78bfa;
+  --accent-strong: #b39df8;
+  --accent-soft: rgba(167, 139, 250, 0.16);
+  --accent-contrast: #17161c;
+
+  --header-bg: rgba(20, 21, 25, 0.8);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3), 0 1px 3px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 6px -2px rgba(0, 0, 0, 0.3), 0 2px 4px -2px rgba(0, 0, 0, 0.25);
+  --shadow-lg: 0 16px 32px -8px rgba(0, 0, 0, 0.6), 0 8px 16px -8px rgba(0, 0, 0, 0.4);
+  --shadow-accent: 0 8px 20px -6px rgba(140, 110, 255, 0.45);
+
+  color-scheme: dark;
+}
+
+/* --- Reset --- */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: inherit;
+}
+
+input,
+textarea {
+  font-family: inherit;
+  color: inherit;
+}
+
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+::selection {
+  background: var(--accent-soft);
+}
+
+/* --- Scrollbar --- */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--text-3);
+  border-radius: 8px;
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-2);
+  background-clip: content-box;
+  border: 3px solid transparent;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* --- Reusable chrome pieces --- */
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  color: var(--text-2);
+  transition: background-color 0.15s ease, color 0.15s ease, transform 0.1s ease;
+  position: relative;
+  outline: none;
+}
+.icon-btn:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+.icon-btn:active {
+  transform: scale(0.94);
+}
+.icon-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+.icon-btn.primary {
+  color: var(--accent);
+}
+.icon-btn.primary:hover {
+  background: var(--accent-soft);
+}
+.icon-btn.active {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+.icon-btn svg {
+  width: 22px;
+  height: 22px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  font-size: 12px;
+  color: var(--text-2);
+  font-weight: 500;
+  transition: all 0.15s ease;
+  max-width: 100%;
+}
+.chip .label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.chip button {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 50%;
+  color: var(--text-3);
+  width: 18px;
+  height: 18px;
+}
+.chip button:hover {
+  color: var(--text);
+  background: var(--border);
+}
+.chip svg {
+  width: 14px;
+  height: 14px;
+}
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 13px;
+  color: #fff;
+  background: linear-gradient(135deg, #7c4dff, #4facfe);
+  user-select: none;
+}
+
+/* --- Empty state --- */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 72px 24px;
+  text-align: center;
+  color: var(--text-3);
+}
+.empty-state .empty-icon {
+  width: 96px;
+  height: 96px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--surface-2);
+  color: var(--text-3);
+}
+.empty-state .empty-icon svg {
+  width: 44px;
+  height: 44px;
+}
+.empty-state h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text);
+}
+.empty-state p {
+  max-width: 320px;
+  font-size: 13px;
+}
+
+/* --- Animations --- */
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 14px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* --- Reduced motion --- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}

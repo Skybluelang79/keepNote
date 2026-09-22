@@ -1,0 +1,322 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 18, 28, 0.5);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 7vh 16px 16px;
+  z-index: 90;
+  animation: fadeIn 0.2s ease both;
+}
+
+.dialog {
+  width: 100%;
+  max-width: 580px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: 18px 20px 12px;
+  animation: fadeSlideUp 0.22s ease both;
+  max-height: 86vh;
+  display: flex;
+  flex-direction: column;
+  outline: none;
+  overflow-y: auto;
+}
+
+.dialog-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.field {
+  width: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  resize: none;
+  display: block;
+}
+
+.field.title {
+  flex: 1;
+  min-width: 0;
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--text);
+  padding: 4px 2px;
+}
+
+.field.content {
+  flex: 1;
+  margin-top: 6px;
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: var(--text);
+  padding: 4px 2px;
+  overflow: auto;
+}
+
+.dialog-labels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.palette-pop {
+  margin-top: 12px;
+  padding: 10px 4px 2px;
+  border-top: 1px solid var(--border);
+}
+
+.dialog-labels-edit {
+  margin-top: 12px;
+}
+
+.label-toggle {
+  cursor: pointer;
+  border-radius: 8px;
+  padding: 7px 12px;
+  font-weight: 600;
+}
+.label-toggle.selected {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.label-options {
+  margin-top: 8px;
+  padding: 6px;
+  background: var(--surface-2);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  max-height: 180px;
+  overflow: auto;
+}
+
+.label-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: 8px;
+  font-size: 13.5px;
+  color: var(--text-2);
+  transition: background-color 0.12s ease, color 0.12s ease;
+  text-align: left;
+}
+.label-option:hover {
+  background: var(--border);
+  color: var(--text);
+}
+.label-option.selected {
+  color: var(--accent);
+  font-weight: 600;
+}
+.label-option svg {
+  width: 18px;
+  height: 18px;
+}
+.label-option svg:last-child {
+  margin-left: auto;
+  width: 16px;
+  height: 16px;
+}
+
+.muted {
+  padding: 8px 12px;
+  font-size: 12.5px;
+  color: var(--text-3);
+}
+
+.dialog-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+
+.foot-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.icon-btn.danger:hover {
+  color: var(--danger);
+  background: var(--danger-soft);
+}
+
+.done-btn {
+  font-weight: 700;
+  font-size: 14px;
+  padding: 8px 20px;
+  border-radius: 12px;
+  background: var(--accent);
+  color: var(--accent-contrast);
+  box-shadow: var(--shadow-accent);
+  transition: transform 0.1s ease, filter 0.15s ease;
+}
+.done-btn:hover {
+  filter: brightness(1.06);
+}
+.done-btn:active {
+  transform: scale(0.97);
+}
+
+/* Checklist editor */
+.checklist-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 4px;
+  max-height: 46vh;
+  overflow: auto;
+}
+
+.todo-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 4px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.todo-row:hover {
+  background: rgba(127, 127, 127, 0.08);
+}
+
+.todo-check {
+  display: inline-flex;
+  align-items: center;
+  color: var(--text-2, #3c4043);
+  flex-shrink: 0;
+}
+.todo-check svg {
+  width: 20px;
+  height: 20px;
+}
+.todo-check.done {
+  color: var(--success);
+}
+
+.todo-input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 14px;
+  color: var(--text);
+  padding: 4px 2px;
+}
+
+.dialog.colored .todo-input {
+  color: #202124;
+}
+.dialog.colored .todo-row:hover {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+/* Reminder */
+.reminder-panel {
+  margin-top: 12px;
+  padding: 10px 4px 4px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.reminder-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-2);
+}
+.reminder-row svg {
+  width: 18px;
+  height: 18px;
+}
+
+.reminder-input {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 7px 10px;
+  font-size: 13px;
+  outline: none;
+}
+.reminder-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.quick-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.quick-row .chip {
+  cursor: pointer;
+  font-weight: 600;
+}
+.quick-row .chip:hover {
+  background: var(--border);
+  color: var(--text);
+}
+.danger-chip:hover {
+  background: var(--danger-soft) !important;
+  color: var(--danger) !important;
+  border-color: var(--danger) !important;
+}
+
+.dialog-stats {
+  margin-top: 12px;
+  padding-top: 2px;
+  font-size: 12px;
+  color: var(--text-3);
+}
+
+/* Colored notes */
+.dialog.colored {
+  border-color: rgba(0, 0, 0, 0.06);
+}
+.dialog.colored .field.title,
+.dialog.colored .field.content {
+  color: #202124;
+}
+.dialog.colored .icon-btn {
+  color: #3c4043;
+}
+.dialog.colored .icon-btn:hover {
+  background: rgba(0, 0, 0, 0.08);
+  color: #111;
+}
+
+@media (max-width: 600px) {
+  .overlay {
+    padding: 3vh 10px 10px;
+  }
+  .dialog {
+    padding: 14px 14px 10px;
+  }
+  .done-btn {
+    padding: 8px 14px;
+  }
+}

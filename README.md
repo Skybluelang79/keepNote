@@ -1,59 +1,59 @@
-# Bingo
+# KeepNote
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.1.4.
+A beautiful, fast, local-first note-taking app. Capture thoughts, pin what matters, color-code ideas, and file everything under labels — all in your browser.
 
-## Development server
+Built with **Angular 20**, zero UI dependencies, and installable as a **PWA**.
 
-To start a local development server, run:
+## Features
 
-```bash
-ng serve
-```
+- 🗒️ **Notes, archive & trash** — file away or delete notes; trash has full **Undo**
+- ✅ **Checklists** — turn any note into a task list with live progress bars
+- ⏰ **Reminders** — per-note date/time alerts with browser notifications
+- 📌 **Pinned notes** — keep important ideas at the top
+- 🎨 **Background colors** — 9-color palette applied to a single note or a whole selection
+- 🏷️ **Labels** — organize notes into work, personal, ideas, or custom labels
+- 📬 **Sidebar counters** — live counts for notes, archive & trash
+- ☑️ **Multi-select** — select several notes and archive, trash, delete or re-color them in one action
+- 🔀 **Drag to reorder** — arrange your notes your way
+- ✨ **Templates** — instant grocery list, to-do list, or meeting notes
+- 🔍 **Instant search** — find anything by title, text, or label
+- 🧮 **Note stats** — word/character counts and “edited x ago” in the editor
+- 📤 **Export / import** — backup all notes as JSON or Markdown, and restore anytime
+- ⌨️ **Keyboard shortcuts** — `N` new note, `/` or `F` search, `Esc` close
+- 🌗 **Light & dark themes** — automatic system detection with manual toggle
+- 📱 **Installable PWA** — works offline after the first visit
+- 💾 **Local-first storage** — autosaves to your browser; no account needed
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
+## Development
 
 ```bash
-ng build
+npm install          # install dependencies
+npm start            # dev server at http://localhost:4200/
+npm run build        # production build to dist/keep-note
+npm test             # unit tests
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+## Project structure
 
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
-
-```bash
-ng test
+```
+src/
+├── app/
+│   ├── components/
+│   │   ├── app-header/       # top bar: brand, search, theme toggle + data menu
+│   │   ├── app-sidebar/      # navigation: notes / archive / trash / labels + counts
+│   │   ├── app-icon/         # inline SVG icon component (no icon-dependency)
+│   │   ├── color-picker/     # reusable note-color palette
+│   │   ├── note-creator/     # "take a note…" composer + templates
+│   │   ├── note-card/        # single note in the masonry grid (checklist, drag, select)
+│   │   ├── notes-view/       # masonry grid, batch bar, empty states
+│   │   └── note-dialog/      # inline editor: checklist, reminders, labels, export
+│   ├── models/               # Note, checklist parsing, colors, templates
+│   ├── services/             # state (signals), localStorage, theme
+│   └── app.component.*       # app shell, shortcuts, reminder timer
+├── index.html
+└── main.ts
 ```
 
-## Running end-to-end tests
+## License
 
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+MIT

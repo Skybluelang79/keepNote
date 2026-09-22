@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "Bingo": {
+    "keepNote": {
       "projectType": "application",
       "schematics": {},
       "root": "",
@@ -13,6 +13,8 @@
         "build": {
           "builder": "@angular/build:application",
           "options": {
+            "outputPath": "dist/keep-note",
+            "index": "src/index.html",
             "browser": "src/main.ts",
             "polyfills": [
               "zone.js"
@@ -20,30 +22,27 @@
             "tsConfig": "tsconfig.app.json",
             "assets": [
               {
-                "styles": [
-                  "src/styles.css"
-                ],
-
                 "glob": "**/*",
                 "input": "public"
               }
             ],
             "styles": [
               "src/styles.css"
-            ]
+            ],
+            "scripts": []
           },
           "configurations": {
             "production": {
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "500kB",
-                  "maximumError": "1MB"
+                  "maximumWarning": "600kB",
+                  "maximumError": "1.2MB"
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "4kB",
-                  "maximumError": "8kB"
+                  "maximumWarning": "8kB",
+                  "maximumError": "16kB"
                 }
               ],
               "outputHashing": "all"
@@ -60,10 +59,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "Bingo:build:production"
+              "buildTarget": "keepNote:build:production"
             },
             "development": {
-              "buildTarget": "Bingo:build:development"
+              "buildTarget": "keepNote:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -81,16 +80,14 @@
             "tsConfig": "tsconfig.spec.json",
             "assets": [
               {
-                "styles": [
-                  "src/styles.css"
-                ]
                 "glob": "**/*",
                 "input": "public"
               }
             ],
             "styles": [
               "src/styles.css"
-            ]
+            ],
+            "scripts": []
           }
         }
       }

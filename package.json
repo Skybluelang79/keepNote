@@ -1,6 +1,8 @@
 {
-  "name": "bingo",
-  "version": "0.0.0",
+  "name": "keepnote",
+  "version": "1.0.0",
+  "description": "KeepNote - A beautiful, modern note-taking app.",
+  "private": true,
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
@@ -18,7 +20,6 @@
       }
     ]
   },
-  "private": true,
   "dependencies": {
     "@angular/common": "^20.1.0",
     "@angular/compiler": "^20.1.0",
