@@ -42,7 +42,8 @@ export type IconName =
   | 'filter_list'
   | 'sort'
   | 'grid'
-  | 'chevron_down';
+  | 'chevron_down'
+  | 'sparkle';
 
 const PATHS: Record<IconName, string> = {
   menu: 'M3 6h18v2H3V6zm0 5h18v2H3v-2zm0 5h18v2H3v-2z',
@@ -115,6 +116,7 @@ const PATHS: Record<IconName, string> = {
   sort: 'M16 17.01V10h-2v7.01h-3L15 21l4-3.99h-3zM9 3L5 6.99h3V14h2V6.99h3L9 3z',
   grid: 'M3 3h8v8H3V3zm10 0h8v8h-8V3zM3 13h8v8H3v-8zm10 0h8v8h-8v-8z',
   chevron_down: 'M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z',
+  sparkle: 'M12 1.5l2.35 4.86 5.37.78-3.89 3.78.92 5.35L12 14.11 7.25 16.27l.92-5.35L4.28 7.14l5.37-.78L12 1.5zM19 15l.78 1.62 1.72.25-1.24 1.2.29 1.71L19 19.19 17.45 19.79l.29-1.72L16.5 16.87l1.72-.25L19 15z',
 };
 
 @Component({

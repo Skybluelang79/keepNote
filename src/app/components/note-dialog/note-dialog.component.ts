@@ -1,7 +1,8 @@
-import { Component, HostListener, effect, inject, signal } from '@angular/core';
+import { Component, HostListener, computed, effect, inject, signal } from '@angular/core';
 import { AppIcon } from '../app-icon/app-icon.component';
 import { ColorPicker } from '../color-picker/color-picker.component';
 import { NotesService } from '../../services/note.service';
+import { AiService, AiAction } from '../../services/ai.service';
 import { Note, formatRelativeTime, formatReminderTime, parseChecklist, wordCount } from '../../models/note.model';
 
 @Component({
@@ -162,8 +163,68 @@ import { Note, formatRelativeTime, formatReminderTime, parseChecklist, wordCount
             {{ stats(current) }}
           </div>
 
+          @if (aiMenuOpen()) {
+            <div class="ai-menu">
+              <button type="button" class="ai-item" (click)="runAi('summarize')">
+                <app-icon name="lightbulb" />
+                <span>Summarize</span>
+              </button>
+              <button type="button" class="ai-item" (click)="runAi('continue')">
+                <app-icon name="flash" />
+                <span>Continue writing</span>
+              </button>
+              <button type="button" class="ai-item" (click)="runAi('improve')">
+                <app-icon name="sparkle" />
+                <span>Improve writing</span>
+              </button>
+              <button type="button" class="ai-item" (click)="runAi('extract')">
+                <app-icon name="checklist" />
+                <span>Extract action items</span>
+              </button>
+            </div>
+          }
+
+          @if (aiBusy()) {
+            <div class="ai-panel">
+              <div class="ai-title"><app-icon name="sparkle" /><span>AI · {{ aiTitle() }}</span></div>
+              <div class="ai-loading">
+                <span class="spinner" aria-hidden="true"></span>
+                <span>Thinking…</span>
+              </div>
+            </div>
+          } @else if (aiError()) {
+            <div class="ai-panel ai-error">
+              <div class="ai-title"><app-icon name="sparkle" /><span>AI · {{ aiTitle() }}</span></div>
+              <p class="ai-text">{{ aiError() }}</p>
+              <div class="ai-actions">
+                <button type="button" class="chip" (click)="retryAi()">Retry</button>
+                <button type="button" class="chip" (click)="dismissAi()">Close</button>
+              </div>
+            </div>
+          } @else if (aiResult()) {
+            <div class="ai-panel">
+              <div class="ai-title"><app-icon name="sparkle" /><span>AI · {{ aiTitle() }}</span></div>
+              <div class="ai-text">{{ aiResult() }}</div>
+              <div class="ai-actions">
+                <button type="button" class="chip ai-apply" (click)="applyAi()">{{ applyAiLabel() }}</button>
+                <button type="button" class="chip" (click)="copyAi()">Copy</button>
+                <button type="button" class="chip" (click)="dismissAi()">Done</button>
+              </div>
+            </div>
+          }
+
           <div class="dialog-foot">
             <div class="foot-actions">
+              <button
+                type="button"
+                class="icon-btn"
+                [class.active]="aiMenuOpen()"
+                aria-label="AI assistant"
+                title="AI assistant"
+                (click)="aiMenuOpen.set(!aiMenuOpen())"
+              >
+                <app-icon name="sparkle" />
+              </button>
               <button
                 type="button"
                 class="icon-btn"
@@ -263,9 +324,37 @@ import { Note, formatRelativeTime, formatReminderTime, parseChecklist, wordCount
 })
 export class NoteDialog {
   protected readonly notes = inject(NotesService);
+  protected readonly ai = inject(AiService);
   protected readonly paletteOpen = signal(false);
   protected readonly labelsOpen = signal(false);
   protected readonly reminderOpen = signal(false);
+  protected readonly aiMenuOpen = signal(false);
+  protected readonly aiBusy = signal(false);
+  protected readonly aiResult = signal<string | null>(null);
+  protected readonly aiError = signal<string | null>(null);
+  protected readonly aiMode = signal<AiAction | null>(null);
+
+  protected readonly aiTitle = computed(() => {
+    switch (this.aiMode()) {
+      case 'summarize':
+        return 'Summarize';
+      case 'continue':
+        return 'Continue writing';
+      case 'improve':
+        return 'Improve writing';
+      case 'extract':
+        return 'Extract action items';
+      default:
+        return 'Assistant';
+    }
+  });
+
+  protected readonly applyAiLabel = computed(() => {
+    const mode = this.aiMode();
+    if (mode === 'continue') return 'Append to note';
+    if (mode === 'extract') return 'Make checklist';
+    return 'Replace note';
+  });
 
   protected readonly note = this.notes.editingNote;
   protected readonly formatReminderTimeFn = formatReminderTime;
@@ -276,6 +365,7 @@ export class NoteDialog {
         this.paletteOpen.set(false);
         this.labelsOpen.set(false);
         this.reminderOpen.set(false);
+        this.dismissAi();
       }
     });
   }
@@ -340,6 +430,79 @@ export class NoteDialog {
 
   downloadMd(note: Note): void {
     this.notes.download(`${safeName(note.title)}.md`, this.notes.exportMarkdown(note), 'text/markdown');
+  }
+
+  async runAi(action: AiAction): Promise<void> {
+    const note = this.note();
+    if (!note || this.aiBusy()) return;
+    this.aiMenuOpen.set(false);
+    if (!note.content.trim() && !note.title.trim()) {
+      this.aiError.set('There\u2019s nothing to work with yet — add some text to the note first.');
+      return;
+    }
+    this.aiMode.set(action);
+    this.aiResult.set(null);
+    this.aiError.set(null);
+    this.aiBusy.set(true);
+    try {
+      const text = await this.ai.generate({
+        action,
+        title: note.title,
+        content: note.content,
+      });
+      if (text) {
+        this.aiResult.set(text);
+      } else {
+        this.aiError.set('The AI returned an empty response. Try again.');
+      }
+    } catch (err) {
+      this.aiError.set(err instanceof Error ? err.message : 'AI request failed.');
+    } finally {
+      this.aiBusy.set(false);
+    }
+  }
+
+  retryAi(): void {
+    const mode = this.aiMode();
+    if (mode) void this.runAi(mode);
+  }
+
+  applyAi(): void {
+    const note = this.note();
+    const result = this.aiResult();
+    if (!note || !result) return;
+    const mode = this.aiMode();
+    if (mode === 'continue') {
+      this.notes.updateNote(note.id, { content: `${note.content.trim()}\n\n${result}` });
+      this.notes.showToast('AI text appended to note');
+    } else if (mode === 'extract') {
+      this.notes.updateNote(note.id, { content: result, checklist: true });
+      this.notes.showToast('Checklist created from AI tasks');
+    } else {
+      this.notes.updateNote(note.id, { content: result });
+      this.notes.showToast('Note updated by AI');
+    }
+    this.dismissAi();
+  }
+
+  async copyAi(): Promise<void> {
+    const result = this.aiResult();
+    if (!result) return;
+    try {
+      await navigator.clipboard.writeText(result);
+      this.notes.showToast('Copied to clipboard');
+    } catch {
+      this.notes.showToast('Could not copy');
+    }
+  }
+
+  dismissAi(): void {
+    this.aiMenuOpen.set(false);
+    this.aiBusy.set(false);
+    this.aiResult.set(null);
+    this.aiError.set(null);
+    if (!this.aiMode()) this.aiMode.set(null);
+    else this.aiMode.set(this.aiMode());
   }
 
   autoGrow(el: HTMLTextAreaElement): void {
