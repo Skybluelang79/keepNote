@@ -15,6 +15,7 @@ import { NotesService } from '../../services/note.service';
       [class.pinned]="note.pinned"
       [class.selecting]="notes.selecting()"
       [class.selected]="notes.selectedIds().includes(note.id)"
+      [class.over]="over"
       [attr.draggable]="notes.selecting() ? 'false' : 'true'"
       [style.background]="note.color || 'var(--surface)'"
       (click)="onCardClick()"
@@ -56,22 +57,7 @@ import { NotesService } from '../../services/note.service';
         @if (note.checklist && checklist().length) {
           <div class="checklist" [class.compact]="!notes.selecting() && checklist().length > 4">
             @for (item of checklist(); track $index) {
-              @if (checklist().length > 4) {
-                @if ($index < 4) {
-                  <div class="todo-row" (click)="$event.stopPropagation()">
-                    <button
-                      type="button"
-                      class="todo-check"
-                      [class.done]="item.checked"
-                      (click)="notes.toggleChecklistItem(note.id, $index)"
-                      [attr.aria-label]="item.checked ? 'Mark not done' : 'Mark done'"
-                    >
-                      <app-icon [name]="item.checked ? 'check_box' : 'check_box_outline'" />
-                    </button>
-                    <span [class.done-text]="item.checked" (click)="notes.toggleChecklistItem(note.id, $index)">{{ item.text }}</span>
-                  </div>
-                }
-              } @else {
+              @if (!compactChecklist() || $index < 4) {
                 <div class="todo-row" (click)="$event.stopPropagation()">
                   <button
                     type="button"
@@ -210,6 +196,10 @@ export class NoteCard {
   );
 
   protected readonly checklist = computed(() => parseChecklist(this.current()?.content ?? '') ?? []);
+
+  protected readonly compactChecklist = computed(
+    () => !this.notes.selecting() && this.checklist().length > 4,
+  );
 
   protected readonly progress = computed(() => {
     const items = this.checklist();

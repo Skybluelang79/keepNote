@@ -1,11 +1,10 @@
-const CACHE = 'keepnote-v1';
-const APP_SHELL = ['/', '/index.html'];
+const CACHE = 'keepnote-v4';
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches
       .open(CACHE)
-      .then((cache) => cache.addAll(APP_SHELL))
+      .then((cache) => cache.addAll(['./', './index.html']))
       .then(() => self.skipWaiting()),
   );
 });
@@ -25,16 +24,16 @@ self.addEventListener('fetch', (event) => {
 
   const url = new URL(request.url);
 
-  // App shell: network first, fall back to cache (so new deploys win).
-  if (request.mode === 'navigate' || url.pathname === '/') {
+  // App shell: network first, fall back to the cached shell (works under any base path).
+  if (request.mode === 'navigate') {
     event.respondWith(
       fetch(request)
         .then((response) => {
           const copy = response.clone();
-          caches.open(CACHE).then((cache) => cache.put('/index.html', copy));
+          caches.open(CACHE).then((cache) => cache.put('./index.html', copy));
           return response;
         })
-        .catch(() => caches.match('/index.html')),
+        .catch(() => caches.match('./index.html', { ignoreSearch: true })),
     );
     return;
   }

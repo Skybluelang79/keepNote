@@ -49,6 +49,7 @@ import { Note, formatRelativeTime, formatReminderTime, parseChecklist, wordCount
                     class="todo-check"
                     [class.done]="item.checked"
                     [attr.aria-label]="item.checked ? 'Mark not done' : 'Mark done'"
+                    (click)="$event.stopPropagation()"
                   >
                     <app-icon [name]="item.checked ? 'check_box' : 'check_box_outline'" />
                   </button>
@@ -295,6 +296,7 @@ export class NoteDialog {
 
   addItem(note: Note, input: HTMLInputElement): void {
     const text = input.value.trim();
+    if (!text) return;
     this.notes.addChecklistItem(note.id, text);
     input.value = '';
     input.focus();

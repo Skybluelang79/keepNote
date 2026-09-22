@@ -2,6 +2,7 @@ import { Component, HostListener, Input, inject, output, signal } from '@angular
 import { AppIcon } from '../app-icon/app-icon.component';
 import { ThemeService } from '../../services/theme.service';
 import { NotesService } from '../../services/note.service';
+import { SyncService } from '../../services/sync.service';
 
 @Component({
   selector: 'app-header',
@@ -112,7 +113,49 @@ import { NotesService } from '../../services/note.service';
         }
       </div>
 
-      <div class="avatar" title="Guest">G</div>
+      <div class="menu-wrap account-wrap">
+        <button
+          type="button"
+          class="account-btn"
+          [attr.aria-label]="sync.user() ? 'Account' : 'Sign in to sync'"
+          [attr.aria-expanded]="accountOpen() ? 'true' : 'false'"
+          (click)="$event.stopPropagation(); accountOpen.set(!accountOpen())"
+        >
+          <span class="avatar">{{ sync.user() ? initials(sync.user()!.email ?? '') : 'G' }}</span>
+          @if (sync.disabled()) {
+            <span class="sync-dot local" title="Local only — sync not configured"></span>
+          } @else if (sync.signedIn()) {
+            <span class="sync-dot" [attr.data-status]="sync.status()" title="Sync status"></span>
+          }
+        </button>
+        @if (accountOpen()) {
+          <div class="dropdown account-dropdown" (click)="$event.stopPropagation()">
+            @if (sync.user(); as user) {
+              <div class="user-row">
+                <span class="avatar">{{ initials(user.email ?? 'K') }}</span>
+                <div class="user-meta">
+                  <strong class="ellipsis">{{ user.email }}</strong>
+                  <span class="st" [attr.data-status]="sync.status()">{{ statusLabel() }}</span>
+                </div>
+              </div>
+              <button type="button" class="dropdown-item" (click)="signOut()">
+                <app-icon name="delete" />
+                <span>Sign out</span>
+              </button>
+            } @else if (sync.disabled()) {
+              <div class="dropdown-title">Sync</div>
+              <div class="local-hint">
+                Local-only mode. Add your Firebase config to enable accounts &amp; cloud sync.
+              </div>
+            } @else {
+              <button type="button" class="dropdown-item" (click)="openAuth()">
+                <app-icon name="add" />
+                <span>Sign in to sync notes</span>
+              </button>
+            }
+          </div>
+        }
+      </div>
     </header>
 
     @if (mobileSearchOpen()) {
@@ -153,7 +196,9 @@ export class AppHeader {
   protected searchFocused = false;
   protected readonly theme = inject(ThemeService);
   protected readonly notes = inject(NotesService);
+  protected readonly sync = inject(SyncService);
   protected readonly menuOpen = signal(false);
+  protected readonly accountOpen = signal(false);
   protected readonly mobileSearchOpen = signal(false);
 
   @HostListener('document:click', ['$event'])
@@ -162,6 +207,37 @@ export class AppHeader {
     if (!target?.closest('.menu-wrap')) {
       this.menuOpen.set(false);
     }
+    if (!target?.closest('.account-wrap')) {
+      this.accountOpen.set(false);
+    }
+  }
+
+  protected initials(email: string): string {
+    const prefix = email.split('@')[0] || 'K';
+    return prefix.slice(0, 2).toUpperCase();
+  }
+
+  protected statusLabel(): string {
+    switch (this.sync.status()) {
+      case 'syncing':
+        return 'Syncing…';
+      case 'synced':
+        return 'Synced';
+      case 'error':
+        return 'Sync error';
+      default:
+        return 'Signed in';
+    }
+  }
+
+  protected openAuth(): void {
+    this.accountOpen.set(false);
+    this.sync.authDialogOpen.set(true);
+  }
+
+  protected signOut(): void {
+    this.accountOpen.set(false);
+    void this.sync.signOutUser();
   }
 
   onQuery(value: string): void {

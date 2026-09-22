@@ -5,6 +5,25 @@
   width: 100%;
 }
 
+/* Colored composer: keep text dark on pastel backgrounds in both themes */
+.creator.colored .creator-title,
+.creator.colored .creator-text {
+  color: #202124;
+}
+
+.creator.colored .creator-text::placeholder {
+  color: #4a4f57;
+}
+
+.creator.colored .icon-btn {
+  color: #3c4043;
+}
+
+.creator.colored .icon-btn:hover {
+  background: rgba(0, 0, 0, 0.08);
+  color: #111;
+}
+
 .creator {
   background: var(--surface);
   border: 1px solid var(--border);

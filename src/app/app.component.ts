@@ -5,12 +5,14 @@ import { NotesView } from './components/notes-view/notes-view.component';
 import { NoteDialog } from './components/note-dialog/note-dialog.component';
 import { ShortcutsDialog } from './components/app-shortcuts/app-shortcuts.component';
 import { AppIcon } from './components/app-icon/app-icon.component';
+import { AdSlot } from './components/ad-slot/ad-slot.component';
+import { AuthDialog } from './components/auth-dialog/auth-dialog.component';
 import { NotesService } from './services/note.service';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [AppHeader, AppSidebar, NotesView, NoteDialog, ShortcutsDialog, AppIcon],
+  imports: [AppHeader, AppSidebar, NotesView, NoteDialog, ShortcutsDialog, AppIcon, AdSlot, AuthDialog],
   styleUrls: ['./app.component.css'],
   template: `
     <div class="app">
@@ -27,11 +29,13 @@ import { NotesService } from './services/note.service';
         </div>
         <main class="main">
           <notes-view />
+          <app-ad-slot variant="leaderboard" class="ad-leaderboard" />
         </main>
       </div>
 
       <note-dialog />
       <app-shortcuts />
+      <app-auth-dialog />
 
       @if (toast(); as t) {
         <div class="toast" role="status">

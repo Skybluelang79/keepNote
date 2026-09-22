@@ -2,12 +2,13 @@ import { Component, inject, signal } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AppIcon } from '../app-icon/app-icon.component';
+import { AdSlot } from '../ad-slot/ad-slot.component';
 import { NotesService, View } from '../../services/note.service';
 
 @Component({
   selector: 'app-sidebar',
   standalone: true,
-  imports: [AppIcon, NgClass, FormsModule],
+  imports: [AppIcon, AdSlot, NgClass, FormsModule],
   styleUrls: ['./app-sidebar.component.css'],
   template: `
     <aside class="sidebar">
@@ -79,7 +80,8 @@ import { NotesService, View } from '../../services/note.service';
       </div>
 
       <footer class="sidebar-foot">
-        <span>KeepNote · Local-first</span>
+        <app-ad-slot variant="box" />
+        <span class="foot-note">KeepNote · Local-first</span>
       </footer>
     </aside>
   `,

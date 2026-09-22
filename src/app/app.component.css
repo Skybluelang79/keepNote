@@ -30,6 +30,17 @@
   padding: 20px 20px 60px;
 }
 
+/* Organized leaderboard ad: desktop only, sits after the grid */
+.ad-leaderboard {
+  margin-top: 32px;
+}
+
+@media (max-width: 959px) {
+  .ad-leaderboard {
+    display: none;
+  }
+}
+
 .scrim {
   display: none;
 }

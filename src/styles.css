@@ -86,6 +86,37 @@ body {
   transition: background-color 0.25s ease, color 0.25s ease;
 }
 
+/* --- Ambient background: hardware photo with a slow, subtle drift --- */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background-image:
+    linear-gradient(rgba(10, 12, 18, 0.55), rgba(10, 12, 18, 0.78)),
+    url('bg-hardware.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  animation: bgDrift 60s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+[data-theme='light'] body::before {
+  background-image:
+    linear-gradient(rgba(20, 26, 40, 0.16), rgba(20, 26, 40, 0.34)),
+    url('bg-hardware.jpg');
+}
+
+@keyframes bgDrift {
+  from {
+    transform: scale(1.02) translate3d(0, 0, 0);
+  }
+  to {
+    transform: scale(1.14) translate3d(-1.8%, 1.4%, 0);
+  }
+}
+
 button {
   font-family: inherit;
   cursor: pointer;

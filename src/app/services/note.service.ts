@@ -13,6 +13,19 @@ export interface ToastState {
 const NOTES_KEY = 'keepnote.notes.v1';
 const LABELS_KEY = 'keepnote.labels.v1';
 
+const SEED_NOTES = seedNotes();
+const SEED_IDS = new Set(SEED_NOTES.map((n) => n.id));
+const SEED_UPDATED = new Map(SEED_NOTES.map((n) => [n.id, n.updatedAt] as const));
+
+/**
+ * True when `notes` is exactly the pristine demo seed set (unmodified).
+ * Lets sync skip copying demo data over a real cloud account on a fresh device.
+ */
+export function isSeededOnly(notes: Note[]): boolean {
+  if (notes.length !== SEED_NOTES.length) return false;
+  return notes.every((n) => SEED_IDS.has(n.id) && SEED_UPDATED.get(n.id) === n.updatedAt);
+}
+
 function uid(): string {
   return typeof crypto !== 'undefined' && 'randomUUID' in crypto
     ? crypto.randomUUID()
@@ -186,10 +199,10 @@ export class NotesService {
   private notify(title: string, body: string): void {
     if (typeof window === 'undefined' || !('Notification' in window)) return;
     if (Notification.permission === 'granted') {
-      new Notification(title, { body, icon: '/icon.svg' });
+      new Notification(title, { body, icon: 'icon.svg' });
     } else if (Notification.permission === 'default') {
       Notification.requestPermission().then((p) => {
-        if (p === 'granted') new Notification(title, { body, icon: '/icon.svg' });
+        if (p === 'granted') new Notification(title, { body, icon: 'icon.svg' });
       });
     }
   }
@@ -448,6 +461,14 @@ export class NotesService {
 
   setQuery(q: string): void {
     this.query.set(q);
+  }
+
+  /** Adopt a full snapshot from cloud sync (merged) and persist locally. */
+  replaceFromCloud(notes: Note[], labels: string[]): void {
+    this.notes.set(notes);
+    this.labels.set(labels);
+    this.persist();
+    this.persistLabels();
   }
 
   openNote(id: string): void {
