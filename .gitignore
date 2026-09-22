@@ -44,3 +44,6 @@ Thumbs.db
 # Local dev server log
 /ng-serve.log
 
+
+# Local Netlify folder
+.netlify
