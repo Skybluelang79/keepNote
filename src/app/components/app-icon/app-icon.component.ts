@@ -39,7 +39,10 @@ export type IconName =
   | 'check_box'
   | 'check_box_outline'
   | 'flash'
-  | 'filter_list';
+  | 'filter_list'
+  | 'sort'
+  | 'grid'
+  | 'chevron_down';
 
 const PATHS: Record<IconName, string> = {
   menu: 'M3 6h18v2H3V6zm0 5h18v2H3v-2zm0 5h18v2H3v-2z',
@@ -109,6 +112,9 @@ const PATHS: Record<IconName, string> = {
     'M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z',
   flash: 'M11 21h-1l1-7H7.5c-.58 0-.57-.32-.38-.66.19-.34.05-.08.07-.12C8.48 10.94 10.42 7.54 13 3h1l-1 7h3.5c.49 0 .56.33.47.51l-.07.15C12.96 17.55 11 21 11 21z',
   filter_list: 'M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z',
+  sort: 'M16 17.01V10h-2v7.01h-3L15 21l4-3.99h-3zM9 3L5 6.99h3V14h2V6.99h3L9 3z',
+  grid: 'M3 3h8v8H3V3zm10 0h8v8h-8V3zM3 13h8v8H3v-8zm10 0h8v8h-8v-8z',
+  chevron_down: 'M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z',
 };
 
 @Component({

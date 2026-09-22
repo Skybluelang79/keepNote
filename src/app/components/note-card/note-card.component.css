@@ -194,6 +194,40 @@
   border-top: 1px solid var(--border);
 }
 
+/* List (horizontal) layout */
+.note-card.list-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 14px 18px;
+}
+.list-card .card-inner {
+  flex: 1;
+  min-width: 0;
+}
+.list-card .card-title {
+  padding-right: 0;
+}
+.list-card .reminder-badge {
+  margin-top: 2px;
+}
+.list-card .toolbar {
+  flex-shrink: 0;
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+  justify-content: flex-end;
+}
+.list-card .pin-flag {
+  position: static;
+  margin-top: 2px;
+  flex-shrink: 0;
+  order: 2;
+}
+.list-card .palette-pop {
+  flex-basis: 100%;
+}
+
 .progress {
   margin-top: 8px;
   height: 4px;

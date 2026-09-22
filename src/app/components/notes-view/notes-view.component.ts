@@ -1,9 +1,10 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, HostListener, computed, inject, signal } from '@angular/core';
 import { NoteCreator } from '../note-creator/note-creator.component';
 import { NoteCard } from '../note-card/note-card.component';
 import { AppIcon, IconName } from '../app-icon/app-icon.component';
 import { ColorPicker } from '../color-picker/color-picker.component';
-import { NotesService } from '../../services/note.service';
+import { NotesService, SortMode, LayoutMode } from '../../services/note.service';
+import { wordCount } from '../../models/note.model';
 
 @Component({
   selector: 'notes-view',
@@ -143,22 +144,78 @@ import { NotesService } from '../../services/note.service';
         }
         @default {
           <div class="notes-head">
-            <span class="note-count">{{ noteCount() }} note{{ noteCount() === 1 ? '' : 's' }}</span>
-            <button
-              type="button"
-              class="select-toggle"
-              [class.active]="notes.selecting()"
-              (click)="notes.selecting() ? notes.stopSelecting() : notes.startSelecting()"
-            >
-              <app-icon name="select" />
-              <span>Select</span>
-            </button>
-          </div>
-          <note-creator />
-          <div class="shortcuts-hint">
-            <span><kbd>N</kbd> new note</span>
-            <span><kbd>/</kbd> search</span>
-            <span><kbd>Esc</kbd> close</span>
+            <div class="head-row">
+              <span class="note-count">{{ noteCount() }} note{{ noteCount() === 1 ? '' : 's' }}</span>
+              <div class="view-controls">
+                <div class="sort-wrap" (click)="$event.stopPropagation()">
+                  <button
+                    type="button"
+                    class="sort-btn"
+                    [class.active]="sortOpen()"
+                    (click)="sortOpen.set(!sortOpen())"
+                    aria-haspopup="menu"
+                    [attr.aria-expanded]="sortOpen()"
+                  >
+                    <app-icon name="sort" />
+                    <span>{{ sortLabel() }}</span>
+                    <app-icon name="chevron_down" />
+                  </button>
+                  @if (sortOpen()) {
+                    <div class="sort-menu" role="menu">
+                      @for (option of sortOptions; track option.value) {
+                        <button
+                          type="button"
+                          class="sort-item"
+                          [class.selected]="sortMode() === option.value"
+                          role="menuitem"
+                          (click)="setSort(option.value)"
+                        >
+                          <app-icon name="check" />
+                          <span>{{ option.label }}</span>
+                        </button>
+                      }
+                    </div>
+                  }
+                </div>
+                <div class="layout-toggle" role="group" aria-label="Layout">
+                  <button
+                    type="button"
+                    class="icon-btn"
+                    [class.active]="layout() === 'cards'"
+                    title="Grid view"
+                    aria-label="Grid view"
+                    (click)="setLayout('cards')"
+                  >
+                    <app-icon name="grid" />
+                  </button>
+                  <button
+                    type="button"
+                    class="icon-btn"
+                    [class.active]="layout() === 'list'"
+                    title="List view"
+                    aria-label="List view"
+                    (click)="setLayout('list')"
+                  >
+                    <app-icon name="list" />
+                  </button>
+                </div>
+                <button
+                  type="button"
+                  class="select-toggle"
+                  [class.active]="notes.selecting()"
+                  (click)="notes.selecting() ? notes.stopSelecting() : notes.startSelecting()"
+                >
+                  <app-icon name="select" />
+                  <span>Select</span>
+                </button>
+              </div>
+            </div>
+            <note-creator />
+            <div class="shortcuts-hint">
+              <span><kbd>N</kbd> new note</span>
+              <span><kbd>/</kbd> search</span>
+              <span><kbd>Esc</kbd> close</span>
+            </div>
           </div>
         }
       }
@@ -172,33 +229,46 @@ import { NotesService } from '../../services/note.service';
           <p>{{ emptyHint() }}</p>
         </div>
       } @else {
-        <div class="masonry">
-          @if (notes.view() === 'notes' && !notes.activeLabel() && pinned().length) {
-            <div class="section">
-              <h3 class="section-title">Pinned</h3>
-              <div class="masonry">
-                @for (note of pinned(); track note.id) {
-                  <note-card [note]="note" />
-                }
+        <div class="masonry" [class.list]="layout() === 'list'">
+          @if (notes.view() === 'notes' && !notes.activeLabel()) {
+            @if (pinned().length) {
+              <div class="section">
+                <h3 class="section-title">Pinned <span class="count">{{ pinned().length }}</span></h3>
+                <div class="masonry" [class.list]="layout() === 'list'">
+                  @for (note of pinned(); track note.id) {
+                    <note-card [note]="note" [layout]="layout()" />
+                  }
+                </div>
               </div>
-            </div>
-          }
-          @if (notes.view() === 'notes' && !notes.activeLabel() && others().length) {
-            <div class="section">
-              <h3 class="section-title">{{ pinned().length ? 'Others' : '' }}</h3>
-              <div class="masonry">
-                @for (note of others(); track note.id) {
-                  <note-card [note]="note" />
+            }
+            @if (others().length) {
+              <div class="section">
+                @if (pinned().length) {
+                  <h3 class="section-title">Others <span class="count">{{ others().length }}</span></h3>
                 }
+                <div class="masonry" [class.list]="layout() === 'list'">
+                  @for (note of others(); track note.id) {
+                    <note-card [note]="note" [layout]="layout()" />
+                  }
+                </div>
               </div>
-            </div>
-          }
-          @if (notes.view() !== 'notes' || notes.activeLabel()) {
+            }
+          } @else {
             @for (note of others(); track note.id) {
-              <note-card [note]="note" />
+              <note-card [note]="note" [layout]="layout()" />
             }
           }
         </div>
+
+        @if (showStats()) {
+          <div class="stats-bar">
+            <span class="stat"><app-icon name="lightbulb" />{{ noteCount() }} note{{ noteCount() === 1 ? '' : 's' }}</span>
+            <span class="sep">·</span>
+            <span class="stat">{{ statsWords() }} words</span>
+            <span class="sep">·</span>
+            <span class="stat">{{ editedThisWeek() }} edited this week</span>
+          </div>
+        }
       }
     </div>
   `,
@@ -206,6 +276,19 @@ import { NotesService } from '../../services/note.service';
 export class NotesView {
   protected readonly notes = inject(NotesService);
   protected readonly paletteOpen = signal(false);
+  protected readonly sortOpen = signal(false);
+
+  protected sortOptions: { value: SortMode; label: string }[] = [
+    { value: 'updated', label: 'Last edited' },
+    { value: 'created', label: 'Newest first' },
+    { value: 'az', label: 'A → Z' },
+  ];
+
+  protected readonly sortMode = computed(() => this.notes.sortMode());
+  protected readonly sortLabel = computed(
+    () => this.sortOptions.find((o) => o.value === this.sortMode())?.label ?? 'Last edited',
+  );
+  protected readonly layout = computed(() => this.notes.layout());
 
   protected readonly pinned = computed(() => this.notes.visible().pinned);
   protected readonly others = computed(() => this.notes.visible().others);
@@ -215,6 +298,34 @@ export class NotesView {
   protected readonly trashCount = computed(() => this.notes.trashCount());
   protected readonly noteCount = computed(() => this.notes.noteCount());
   protected readonly resultCount = computed(() => this.viewTotal());
+
+  protected readonly showStats = computed(
+    () =>
+      this.notes.view() === 'notes' &&
+      !this.notes.activeLabel() &&
+      !this.notes.query() &&
+      this.viewTotal() > 0,
+  );
+  protected readonly statsWords = computed(() =>
+    this.visibleAll().reduce((sum, n) => sum + wordCount(n.content), 0),
+  );
+  protected readonly editedThisWeek = computed(
+    () => this.visibleAll().filter((n) => Date.now() - n.updatedAt < 7 * 86_400_000).length,
+  );
+
+  @HostListener('window:click')
+  protected onDocClick(): void {
+    this.sortOpen.set(false);
+  }
+
+  setSort(mode: SortMode): void {
+    this.notes.setSort(mode);
+    this.sortOpen.set(false);
+  }
+
+  setLayout(mode: LayoutMode): void {
+    this.notes.setLayout(mode);
+  }
 
   protected readonly emptyIcon = computed<IconName>(() =>
     this.notes.view() === 'archive'

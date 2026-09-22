@@ -162,3 +162,58 @@
   height: 18px;
   flex-shrink: 0;
 }
+
+.icon-btn.set {
+  color: var(--accent);
+}
+
+/* Reminder */
+.reminder-panel {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+}
+
+.reminder-input {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface-2);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 13px;
+  padding: 8px 10px;
+  outline: none;
+  color-scheme: light dark;
+}
+.reminder-input:focus {
+  border-color: var(--accent);
+}
+
+.quick-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.chip.danger-chip {
+  color: var(--danger);
+  border-color: var(--danger);
+}
+.chip.danger-chip:hover {
+  background: var(--danger-soft);
+}
+
+.reminder-summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+}
+.reminder-summary svg {
+  width: 16px;
+  height: 16px;
+}

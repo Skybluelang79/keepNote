@@ -16,6 +16,7 @@ import { NotesService } from '../../services/note.service';
       [class.selecting]="notes.selecting()"
       [class.selected]="notes.selectedIds().includes(note.id)"
       [class.over]="over"
+      [class.list-card]="layout === 'list'"
       [attr.draggable]="notes.selecting() ? 'false' : 'true'"
       [style.background]="note.color || 'var(--surface)'"
       (click)="onCardClick()"
@@ -186,6 +187,7 @@ import { NotesService } from '../../services/note.service';
 })
 export class NoteCard {
   @Input({ required: true }) note!: Note;
+  @Input() layout: 'cards' | 'list' = 'cards';
   protected readonly notes = inject(NotesService);
   protected hover = false;
   protected over = false;

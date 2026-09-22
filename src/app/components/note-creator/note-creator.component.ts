@@ -1,7 +1,7 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { AppIcon, IconName } from '../app-icon/app-icon.component';
 import { ColorPicker } from '../color-picker/color-picker.component';
-import { NoteTemplate, NOTE_TEMPLATES } from '../../models/note.model';
+import { NoteTemplate, NOTE_TEMPLATES, formatReminderTime } from '../../models/note.model';
 import { NotesService } from '../../services/note.service';
 
 @Component({
@@ -83,9 +83,20 @@ import { NotesService } from '../../services/note.service';
             >
               <app-icon name="templates" />
             </button>
+            <button
+              type="button"
+              class="icon-btn primary"
+              [class.active]="reminderOpen()"
+              [class.set]="!!reminder()"
+              aria-label="Set a reminder"
+              title="Set a reminder"
+              (click)="reminderOpen.set(!reminderOpen())"
+            >
+              <app-icon name="notifications" />
+            </button>
           </div>
           <button type="button" class="close-btn" (click)="close()">
-            {{ titleValue || contentValue ? 'Done' : 'Close' }}
+            {{ titleValue || contentValue || reminder() ? 'Done' : 'Close' }}
           </button>
         </div>
 
@@ -128,6 +139,33 @@ import { NotesService } from '../../services/note.service';
             }
           </div>
         }
+
+        @if (reminderOpen()) {
+          <div class="panel reminder-panel">
+            <input
+              #when
+              type="datetime-local"
+              class="reminder-input"
+              [value]="reminder() ? toLocalInput(reminder()!) : ''"
+              (change)="setReminder(when.value)"
+              aria-label="Reminder date and time"
+            />
+            <div class="quick-row">
+              <button type="button" class="chip" (click)="quickReminder(60 * 60 * 1000)">+1 hour</button>
+              <button type="button" class="chip" (click)="quickReminder(3 * 60 * 60 * 1000)">+3 hours</button>
+              <button type="button" class="chip" (click)="quickReminder(26 * 60 * 60 * 1000)">Tomorrow</button>
+              @if (reminder()) {
+                <button type="button" class="chip danger-chip" (click)="reminder.set(null)">Clear</button>
+              }
+            </div>
+            @if (reminder()) {
+              <div class="reminder-summary">
+                <app-icon name="notifications" />
+                <span>{{ reminderLabel() }}</span>
+              </div>
+            }
+          </div>
+        }
       }
     </div>
   `,
@@ -138,12 +176,18 @@ export class NoteCreator {
   protected readonly paletteOpen = signal(false);
   protected readonly labelsOpen = signal(false);
   protected readonly templatesOpen = signal(false);
+  protected readonly reminderOpen = signal(false);
   protected readonly pinned = signal(false);
   protected readonly archived = signal(false);
   protected readonly color = signal('');
   protected readonly labels = signal<string[]>([]);
+  protected readonly reminder = signal<number | null>(null);
   protected readonly selectedTemplate = signal<NoteTemplate | null>(null);
   protected readonly templates = NOTE_TEMPLATES;
+
+  protected readonly reminderLabel = computed(() =>
+    this.reminder() ? formatReminderTime(this.reminder()!) : '',
+  );
 
   protected titleValue = '';
   protected contentValue = '';
@@ -198,6 +242,7 @@ export class NoteCreator {
 
   close(): void {
     if (this.titleValue.trim() || this.contentValue.trim()) {
+      if (this.reminder()) this.notes.requestNotificationPermission();
       this.notes.createNote({
         title: this.titleValue.trim(),
         content: this.contentValue.trim(),
@@ -206,7 +251,9 @@ export class NoteCreator {
         pinned: this.pinned(),
         archived: this.archived(),
         checklist: this.selectedTemplate()?.checklist ?? false,
+        reminder: this.reminder(),
       });
+      if (this.reminder()) this.notes.showToast('Reminder set');
     }
     this.titleValue = '';
     this.contentValue = '';
@@ -214,11 +261,42 @@ export class NoteCreator {
     this.pinned.set(false);
     this.archived.set(false);
     this.labels.set([]);
+    this.reminder.set(null);
     this.selectedTemplate.set(null);
     this.expanded.set(false);
     this.paletteOpen.set(false);
     this.labelsOpen.set(false);
     this.templatesOpen.set(false);
+    this.reminderOpen.set(false);
     this.textarea = null;
+  }
+
+  setReminder(value: string): void {
+    if (!value) {
+      this.reminder.set(null);
+      return;
+    }
+    const ms = new Date(value).getTime();
+    if (!Number.isNaN(ms) && ms > Date.now()) {
+      this.reminder.set(ms);
+      this.notes.showToast('Reminder set');
+    } else if (!Number.isNaN(ms)) {
+      this.showToastMessage('Reminder must be in the future');
+    }
+  }
+
+  quickReminder(offsetMs: number): void {
+    this.reminder.set(Date.now() + offsetMs);
+    this.notes.showToast('Reminder set');
+  }
+
+  toLocalInput(ms: number): string {
+    const d = new Date(ms);
+    const pad = (n: number) => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  }
+
+  private showToastMessage(msg: string): void {
+    this.notes.showToast(msg);
   }
 }

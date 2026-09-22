@@ -3,6 +3,8 @@ import { Note } from '../models/note.model';
 import { addChecklistItem, parseChecklist, setChecklistItem } from '../models/note.model';
 
 export type View = 'notes' | 'archive' | 'trash';
+export type SortMode = 'updated' | 'created' | 'az';
+export type LayoutMode = 'cards' | 'list';
 
 export interface ToastState {
   message: string;
@@ -12,6 +14,8 @@ export interface ToastState {
 
 const NOTES_KEY = 'keepnote.notes.v1';
 const LABELS_KEY = 'keepnote.labels.v1';
+const SORT_KEY = 'keepnote.sort.v1';
+const LAYOUT_KEY = 'keepnote.layout.v1';
 
 const SEED_NOTES = seedNotes();
 const SEED_IDS = new Set(SEED_NOTES.map((n) => n.id));
@@ -50,6 +54,39 @@ function loadLabels(): string[] {
     /* ignore */
   }
   return ['Work', 'Personal', 'Ideas'];
+}
+
+function loadSort(): SortMode {
+  try {
+    const v = localStorage.getItem(SORT_KEY);
+    if (v === 'created' || v === 'az') return v;
+  } catch {
+    /* ignore */
+  }
+  return 'updated';
+}
+
+function loadLayout(): LayoutMode {
+  try {
+    const v = localStorage.getItem(LAYOUT_KEY);
+    if (v === 'list') return v;
+  } catch {
+    /* ignore */
+  }
+  return 'cards';
+}
+
+function bySort(mode: SortMode): (a: Note, b: Note) => number {
+  switch (mode) {
+    case 'created':
+      return (a, b) => b.createdAt - a.createdAt;
+    case 'az':
+      return (a, b) =>
+        (a.title || '').trim().toLowerCase().localeCompare((b.title || '').trim().toLowerCase()) ||
+        b.createdAt - a.createdAt;
+    default:
+      return (a, b) => b.updatedAt - a.updatedAt;
+  }
 }
 
 function seedNotes(): Note[] {
@@ -130,6 +167,8 @@ export class NotesService {
   readonly selecting = signal(false);
   readonly selectedIds = signal<string[]>([]);
   readonly shortcutsOpen = signal(false);
+  readonly sortMode = signal<SortMode>(loadSort());
+  readonly layout = signal<LayoutMode>(loadLayout());
 
   private toastTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -160,7 +199,7 @@ export class NotesService {
   });
 
   readonly visible = computed(() => {
-    const list = this.scoped();
+    const list = [...this.scoped()].sort(bySort(this.sortMode()));
     if (this.view() === 'notes' && !this.activeLabel()) {
       return {
         pinned: list.filter((n) => n.pinned),
@@ -169,6 +208,24 @@ export class NotesService {
     }
     return { pinned: [] as Note[], others: list };
   });
+
+  setSort(mode: SortMode): void {
+    this.sortMode.set(mode);
+    try {
+      localStorage.setItem(SORT_KEY, mode);
+    } catch {
+      /* ignore */
+    }
+  }
+
+  setLayout(mode: LayoutMode): void {
+    this.layout.set(mode);
+    try {
+      localStorage.setItem(LAYOUT_KEY, mode);
+    } catch {
+      /* ignore */
+    }
+  }
 
   readonly selectedNotes = computed(() =>
     this.notes().filter((n) => this.selectedIds().includes(n.id)),
