@@ -78,7 +78,12 @@ body {
 
 body {
   font-family: var(--font);
-  background: var(--bg);
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(ellipse 90% 55% at 8% -12%, rgba(124, 77, 255, 0.1), transparent 60%),
+    radial-gradient(ellipse 70% 45% at 100% 0%, rgba(56, 189, 248, 0.07), transparent 55%),
+    radial-gradient(ellipse 60% 40% at 50% 110%, rgba(124, 77, 255, 0.06), transparent 60%);
+  background-attachment: fixed;
   color: var(--text);
   font-size: 14px;
   line-height: 1.5;
@@ -86,35 +91,11 @@ body {
   transition: background-color 0.25s ease, color 0.25s ease;
 }
 
-/* --- Ambient background: hardware photo with a slow, subtle drift --- */
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: -1;
+[data-theme='dark'] body {
   background-image:
-    linear-gradient(rgba(10, 12, 18, 0.55), rgba(10, 12, 18, 0.78)),
-    url('bg-hardware.jpg');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  animation: bgDrift 60s ease-in-out infinite alternate;
-  will-change: transform;
-}
-
-[data-theme='light'] body::before {
-  background-image:
-    linear-gradient(rgba(20, 26, 40, 0.16), rgba(20, 26, 40, 0.34)),
-    url('bg-hardware.jpg');
-}
-
-@keyframes bgDrift {
-  from {
-    transform: scale(1.02) translate3d(0, 0, 0);
-  }
-  to {
-    transform: scale(1.14) translate3d(-1.8%, 1.4%, 0);
-  }
+    radial-gradient(ellipse 90% 55% at 8% -12%, rgba(167, 139, 250, 0.16), transparent 60%),
+    radial-gradient(ellipse 70% 45% at 100% 0%, rgba(56, 189, 248, 0.08), transparent 55%),
+    radial-gradient(ellipse 60% 40% at 50% 110%, rgba(167, 139, 250, 0.1), transparent 60%);
 }
 
 button {

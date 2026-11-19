@@ -1,4 +1,4 @@
-const MODEL = process.env.GEMINI_MODEL || 'gemini-3.8-flash';
+const MODEL = process.env.GEMINI_MODEL || 'gemini-2.0-flash';
 const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(MODEL)}:generateContent`;
 const MAX_INPUT = 6000;
 
@@ -11,6 +11,12 @@ const PROMPTS = {
     `You are an editing assistant for a notes app. Rewrite the note below to be clearer, better structured and more polished. Preserve every fact and stay in the same language. Output only the improved note.\n\n${title ? `Title: ${title}\n` : ''}Note:\n${text}`,
   extract: (title, text) =>
     `You are a planning assistant for a notes app. Extract the action items or tasks from the note below. Return them as a checklist, one task per line, each line starting with "- [ ] ". Include only actionable tasks and nothing else.\n\n${title ? `Title: ${title}\n` : ''}Note:\n${text}`,
+  title: (title, text) =>
+    `You are a writing assistant for a notes app. Generate a short, clear, descriptive title for the note below (max 8 words). ${title ? `The current title is "${title}" — improve or replace it if needed. ` : ''}Keep the same language as the note. Output only the title text with no quotes or punctuation at the end.\n\nNote:\n${text}`,
+  fix: (title, text) =>
+    `You are a proofreading assistant for a notes app. Correct grammar, spelling, and punctuation in the note below while preserving its meaning, tone, formatting, and language. Output only the corrected note.\n\n${title ? `Title: ${title}\n` : ''}Note:\n${text}`,
+  shorten: (title, text) =>
+    `You are an editing assistant for a notes app. Rewrite the note below to be significantly shorter and more concise while keeping the key information and the same language. Output only the shortened note.\n\n${title ? `Title: ${title}\n` : ''}Note:\n${text}`,
 };
 
 const TEMPERATURES = {
@@ -18,9 +24,12 @@ const TEMPERATURES = {
   continue: 0.8,
   improve: 0.6,
   extract: 0.3,
+  title: 0.5,
+  fix: 0.2,
+  shorten: 0.5,
 };
 
-const ALLOWED_ACTIONS = new Set(['summarize', 'continue', 'improve', 'extract']);
+const ALLOWED_ACTIONS = new Set(['summarize', 'continue', 'improve', 'extract', 'title', 'fix', 'shorten']);
 
 const ok = (body, statusCode = 200) => ({
   statusCode,

@@ -177,6 +177,18 @@ import { Note, formatRelativeTime, formatReminderTime, parseChecklist, wordCount
                 <app-icon name="sparkle" />
                 <span>Improve writing</span>
               </button>
+              <button type="button" class="ai-item" (click)="runAi('fix')">
+                <app-icon name="auto_fix" />
+                <span>Fix spelling & grammar</span>
+              </button>
+              <button type="button" class="ai-item" (click)="runAi('shorten')">
+                <app-icon name="compress" />
+                <span>Make shorter</span>
+              </button>
+              <button type="button" class="ai-item" (click)="runAi('title')">
+                <app-icon name="title" />
+                <span>Suggest a title</span>
+              </button>
               <button type="button" class="ai-item" (click)="runAi('extract')">
                 <app-icon name="checklist" />
                 <span>Extract action items</span>
@@ -344,6 +356,12 @@ export class NoteDialog {
         return 'Improve writing';
       case 'extract':
         return 'Extract action items';
+      case 'title':
+        return 'Suggested title';
+      case 'fix':
+        return 'Fix spelling & grammar';
+      case 'shorten':
+        return 'Shorter version';
       default:
         return 'Assistant';
     }
@@ -353,6 +371,7 @@ export class NoteDialog {
     const mode = this.aiMode();
     if (mode === 'continue') return 'Append to note';
     if (mode === 'extract') return 'Make checklist';
+    if (mode === 'title') return 'Use as title';
     return 'Replace note';
   });
 
@@ -478,6 +497,9 @@ export class NoteDialog {
     } else if (mode === 'extract') {
       this.notes.updateNote(note.id, { content: result, checklist: true });
       this.notes.showToast('Checklist created from AI tasks');
+    } else if (mode === 'title') {
+      this.notes.updateNote(note.id, { title: result.trim() });
+      this.notes.showToast('Title updated by AI');
     } else {
       this.notes.updateNote(note.id, { content: result });
       this.notes.showToast('Note updated by AI');
@@ -501,8 +523,7 @@ export class NoteDialog {
     this.aiBusy.set(false);
     this.aiResult.set(null);
     this.aiError.set(null);
-    if (!this.aiMode()) this.aiMode.set(null);
-    else this.aiMode.set(this.aiMode());
+    this.aiMode.set(null);
   }
 
   autoGrow(el: HTMLTextAreaElement): void {

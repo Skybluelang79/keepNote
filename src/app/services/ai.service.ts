@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 
-export type AiAction = 'summarize' | 'continue' | 'improve' | 'extract';
+export type AiAction = 'summarize' | 'continue' | 'improve' | 'extract' | 'title' | 'fix' | 'shorten';
 
 export interface AiRequest {
   action: AiAction;

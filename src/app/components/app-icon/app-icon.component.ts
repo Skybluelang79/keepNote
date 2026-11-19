@@ -43,7 +43,10 @@ export type IconName =
   | 'sort'
   | 'grid'
   | 'chevron_down'
-  | 'sparkle';
+  | 'sparkle'
+  | 'auto_fix'
+  | 'title'
+  | 'compress';
 
 const PATHS: Record<IconName, string> = {
   menu: 'M3 6h18v2H3V6zm0 5h18v2H3v-2zm0 5h18v2H3v-2z',
@@ -117,6 +120,9 @@ const PATHS: Record<IconName, string> = {
   grid: 'M3 3h8v8H3V3zm10 0h8v8h-8V3zM3 13h8v8H3v-8zm10 0h8v8h-8v-8z',
   chevron_down: 'M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z',
   sparkle: 'M12 1.5l2.35 4.86 5.37.78-3.89 3.78.92 5.35L12 14.11 7.25 16.27l.92-5.35L4.28 7.14l5.37-.78L12 1.5zM19 15l.78 1.62 1.72.25-1.24 1.2.29 1.71L19 19.19 17.45 19.79l.29-1.72L16.5 16.87l1.72-.25L19 15z',
+  auto_fix: 'M7.5 5.6L10 7 8.6 4.5 10 2 7.5 3.4 5 2l1.4 2.5L5 7l2.5-1.4zm12 9.8L22 14l-1.4-2.5L22 9l-2.5 1.4L17 9l1.4 2.5L17 14l2.5 1.4zM22 2l-2.5 1.4L17 2l1.4 2.5L17 7l2.5-1.4L22 7l-1.4-2.5L22 2zm-9.59 5.41l-1.41 1.41 7.17 7.17 1.41-1.41-7.17-7.17zM13.13 9.54L3.54 19.12c-.39.39-.39 1.02 0 1.41l.94.94c.39.39 1.02.39 1.41 0l9.58-9.58-2.34-2.35z',
+  title: 'M5 4v3h5.5v12h3V7H19V4H5z',
+  compress: 'M4 12h16v2H4v-2zm2-5h12v2H6V7zm2 10h8v2H8v-2z',
 };
 
 @Component({
