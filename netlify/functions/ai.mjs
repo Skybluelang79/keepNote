@@ -1,6 +1,6 @@
 const MODEL = process.env.GEMINI_MODEL || 'gemini-2.0-flash';
 const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(MODEL)}:generateContent`;
-const MAX_INPUT = 6000;
+const MAX_INPUT = 8000;
 
 const PROMPTS = {
   summarize: (title, text) =>
@@ -17,6 +17,14 @@ const PROMPTS = {
     `You are a proofreading assistant for a notes app. Correct grammar, spelling, and punctuation in the note below while preserving its meaning, tone, formatting, and language. Output only the corrected note.\n\n${title ? `Title: ${title}\n` : ''}Note:\n${text}`,
   shorten: (title, text) =>
     `You are an editing assistant for a notes app. Rewrite the note below to be significantly shorter and more concise while keeping the key information and the same language. Output only the shortened note.\n\n${title ? `Title: ${title}\n` : ''}Note:\n${text}`,
+  tags: (title, text, labels) =>
+    `You are an organization assistant for a notes app. Suggest up to 3 short labels for the note below. Prefer labels from this existing list: ${labels || 'none'}. Return only the labels separated by commas, with no bullets or explanation.\n\n${title ? `Title: ${title}\n` : ''}Note:\n${text}`,
+  organize: (title, text, labels) =>
+    `You are an organization assistant for a notes app. Turn the note below into structured data. Prefer labels from this existing list: ${labels || 'none'}. Return ONLY valid JSON with this exact shape: {"title":"string","labels":["label"],"summary":"string","tasks":["task"]}. Keep 1-3 labels and 1-8 tasks. Keep the same language as the note. Do not include markdown fences.\n\n${title ? `Current title: ${title}\n` : ''}Note:\n${text}`,
+  brainstorm: (title, text) =>
+    `You are a creative assistant for a notes app. Brainstorm 5 practical, distinct ideas related to the note below. Return them as short bullet points, each starting with "- ". Keep the same language as the note. Output only the bullets.\n\n${title ? `Title: ${title}\n` : ''}Note:\n${text}`,
+  custom: (title, text, instruction) =>
+    `You are a helpful writing assistant inside a notes app. Follow this user instruction: ${instruction || 'Improve the note.'}\nKeep the same language as the note and preserve facts unless the instruction says otherwise. Output only the final result, with no preamble.\n\n${title ? `Title: ${title}\n` : ''}Note:\n${text}`,
 };
 
 const TEMPERATURES = {
@@ -27,16 +35,32 @@ const TEMPERATURES = {
   title: 0.5,
   fix: 0.2,
   shorten: 0.5,
+  tags: 0.3,
+  organize: 0.2,
+  brainstorm: 0.9,
+  custom: 0.6,
 };
 
-const ALLOWED_ACTIONS = new Set(['summarize', 'continue', 'improve', 'extract', 'title', 'fix', 'shorten']);
+const ALLOWED_ACTIONS = new Set([
+  'summarize',
+  'continue',
+  'improve',
+  'extract',
+  'title',
+  'fix',
+  'shorten',
+  'tags',
+  'organize',
+  'brainstorm',
+  'custom',
+]);
 
 const ok = (body, statusCode = 200) => ({
   statusCode,
   headers: {
     'Content-Type': 'application/json',
     'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Allow-Headers': 'Content-Type, x-gemini-api-key',
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
   },
   body: JSON.stringify(body),
@@ -48,9 +72,6 @@ export const handler = async (event) => {
   }
   if (event.httpMethod !== 'POST') return ok({ error: 'Method not allowed' }, 405);
 
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) return ok({ error: 'AI_NOT_CONFIGURED' }, 500);
-
   let payload;
   try {
     payload = JSON.parse(event.body || '{}');
@@ -58,14 +79,28 @@ export const handler = async (event) => {
     return ok({ error: 'Invalid JSON body' }, 400);
   }
 
-  const { action, title = '', content = '' } = payload;
+  const { action, title = '', content = '', instruction = '', labels = [] } = payload;
   if (!ALLOWED_ACTIONS.has(action)) return ok({ error: 'Unknown action' }, 400);
 
+  const safeTitle = String(title).trim().slice(0, 300);
   const text = String(content).trim();
-  if (!text) return ok({ error: 'Note is empty' }, 400);
-  const truncated = text.length > MAX_INPUT ? text.slice(0, MAX_INPUT) : text;
+  const source = [safeTitle, text].filter(Boolean).join('\n');
+  if (!source) return ok({ error: 'Note is empty' }, 400);
 
-  const prompt = PROMPTS[action](String(title).trim(), truncated);
+  const truncated = source.length > MAX_INPUT ? source.slice(0, MAX_INPUT) : source;
+  const safeInstruction = String(instruction).replace(/\s+/g, ' ').trim().slice(0, 400);
+  const safeLabels = Array.isArray(labels)
+    ? labels.map((label) => String(label).trim().slice(0, 40)).filter(Boolean).slice(0, 20)
+    : [];
+
+  const headerKey =
+    event.headers?.['x-gemini-api-key'] || event.headers?.['X-Gemini-Api-Key'] || '';
+  const apiKey = String(payload.apiKey || headerKey || process.env.GEMINI_API_KEY || '')
+    .trim()
+    .slice(0, 256);
+  if (!apiKey) return ok({ error: 'AI_NOT_CONFIGURED' }, 500);
+
+  const prompt = PROMPTS[action](safeTitle, truncated, safeInstruction || safeLabels.join(', '));
 
   try {
     const res = await fetch(API_URL, {
@@ -78,7 +113,7 @@ export const handler = async (event) => {
         contents: [{ parts: [{ text: prompt }] }],
         generationConfig: {
           temperature: TEMPERATURES[action],
-          maxOutputTokens: 1600,
+          maxOutputTokens: action === 'organize' ? 1200 : 1600,
         },
       }),
     });
@@ -86,12 +121,16 @@ export const handler = async (event) => {
     if (!res.ok) {
       const detail = await res.text();
       console.error('Gemini error', res.status, detail.slice(0, 500));
-      return ok({ error: { status: res.status, message: 'Gemini request failed' } }, 502);
+      const message =
+        res.status === 400 || res.status === 403
+          ? 'Gemini request failed — check your API key'
+          : 'Gemini request failed';
+      return ok({ error: { status: res.status, message } }, 502);
     }
 
     const data = await res.json();
     const output =
-      data?.candidates?.[0]?.content?.parts?.map((p) => p.text ?? '').join('')?.trim() ?? '';
+      data?.candidates?.[0]?.content?.parts?.map((part) => part.text ?? '').join('')?.trim() ?? '';
 
     if (!output) return ok({ error: 'Gemini returned an empty response' }, 502);
     return ok({ text: output });

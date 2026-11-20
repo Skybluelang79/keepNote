@@ -7,12 +7,25 @@ import { ShortcutsDialog } from './components/app-shortcuts/app-shortcuts.compon
 import { AppIcon } from './components/app-icon/app-icon.component';
 import { AdSlot } from './components/ad-slot/ad-slot.component';
 import { AuthDialog } from './components/auth-dialog/auth-dialog.component';
+import { CommandPalette } from './components/command-palette/command-palette.component';
+import { AiSettingsDialog } from './components/ai-settings-dialog/ai-settings-dialog.component';
 import { NotesService } from './services/note.service';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [AppHeader, AppSidebar, NotesView, NoteDialog, ShortcutsDialog, AppIcon, AdSlot, AuthDialog],
+  imports: [
+    AppHeader,
+    AppSidebar,
+    NotesView,
+    NoteDialog,
+    ShortcutsDialog,
+    AppIcon,
+    AdSlot,
+    AuthDialog,
+    CommandPalette,
+    AiSettingsDialog,
+  ],
   styleUrls: ['./app.component.css'],
   template: `
     <div class="app">
@@ -36,6 +49,8 @@ import { NotesService } from './services/note.service';
       <note-dialog />
       <app-shortcuts />
       <app-auth-dialog />
+      <command-palette />
+      <ai-settings-dialog />
 
       @if (toast(); as t) {
         <div class="toast" role="status">
@@ -59,6 +74,17 @@ export class AppComponent {
 
   @HostListener('window:keydown', ['$event'])
   protected onKeydown(event: KeyboardEvent): void {
+    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+      event.preventDefault();
+      this.notes.commandPaletteOpen.set(!this.notes.commandPaletteOpen());
+      return;
+    }
+    if (event.altKey && event.key.toLowerCase() === 'f') {
+      event.preventDefault();
+      if (this.notes.editingNote()) this.notes.toggleFocusMode();
+      return;
+    }
+
     const target = event.target as HTMLElement | null;
     const typing =
       target &&
@@ -78,6 +104,7 @@ export class AppComponent {
       const input = document.querySelector<HTMLInputElement>('.search-input');
       input?.focus();
     } else if (event.key === 'Escape') {
+      if (this.notes.commandPaletteOpen()) return;
       this.notes.stopSelecting();
     } else if (event.key === '?' || (event.key.toLowerCase() === '/' && event.altKey)) {
       event.preventDefault();

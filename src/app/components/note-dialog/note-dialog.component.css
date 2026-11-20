@@ -427,6 +427,57 @@
   color: #111;
 }
 
+.dialog.focus {
+  max-width: 760px;
+  padding: 28px 32px 22px;
+}
+.dialog.focus .field.content,
+.dialog.focus .checklist-editor {
+  min-height: 52vh;
+  font-size: 16px;
+  line-height: 1.8;
+  margin-top: 18px;
+}
+.dialog.focus .field.title {
+  font-size: 22px;
+}
+.dialog.focus .dialog-labels,
+.dialog.focus .dialog-labels-edit,
+.dialog.focus .dialog-stats,
+.dialog.focus .palette-pop,
+.dialog.focus .reminder-panel,
+.dialog.focus .ai-menu,
+.dialog.focus .ai-panel,
+.dialog.focus .dialog-foot {
+  display: none;
+}
+
+.custom-prompt {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  padding: 4px;
+}
+.custom-input {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  font-size: 13px;
+  outline: none;
+}
+.custom-input:focus {
+  border-color: var(--accent);
+}
+.custom-prompt .chip {
+  cursor: pointer;
+  white-space: nowrap;
+}
+
 @media (max-width: 600px) {
   .overlay {
     padding: 3vh 10px 10px;

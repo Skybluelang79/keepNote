@@ -39,13 +39,15 @@ export class ShortcutsDialog {
   protected readonly rows = [
     { keys: ['N'], desc: 'Create a new note' },
     { keys: ['/', 'F'], desc: 'Search your notes' },
+    { keys: ['Ctrl', 'K'], desc: 'Open the command palette' },
+    { keys: ['Alt', 'F'], desc: 'Toggle focus mode in an open note' },
     { keys: ['Esc'], desc: 'Close dialog / exit selection' },
     { keys: ['?', 'Alt + /'], desc: 'Show this help' },
   ];
 
   @HostListener('window:keydown', ['$event'])
   protected onKeydown(event: KeyboardEvent): void {
-    if (event.key === 'Escape') {
+    if (event.key === 'Escape' && !this.notes.commandPaletteOpen()) {
       this.notes.shortcutsOpen.set(false);
     }
   }

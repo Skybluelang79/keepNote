@@ -1,0 +1,133 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 105;
+  display: grid;
+  place-items: center;
+  padding: 4vh 20px;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(3px);
+  animation: fadeIn 0.16s ease both;
+}
+
+.panel {
+  width: 100%;
+  max-width: 460px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  animation: fadeSlideUp 0.18s ease both;
+}
+
+.panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 18px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.heading-icon {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+.heading-icon app-icon {
+  width: 18px;
+  height: 18px;
+}
+h2 {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.panel-body {
+  padding: 16px 18px;
+}
+.intro {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text-2);
+  margin-bottom: 16px;
+}
+.field-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-2);
+  margin-bottom: 6px;
+}
+.key-input {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: 13px;
+  outline: none;
+}
+.key-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+.status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  font-size: 12px;
+  color: var(--text-3);
+}
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--text-3);
+}
+.status.own {
+  color: var(--success);
+}
+.status.own .status-dot {
+  background: var(--success);
+}
+
+.panel-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 18px;
+  border-top: 1px solid var(--border);
+}
+.foot-right {
+  display: flex;
+  gap: 8px;
+}
+.ghost-btn,
+.save-btn {
+  border-radius: 10px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.ghost-btn {
+  color: var(--text-2);
+  background: var(--surface-2);
+}
+.save-btn {
+  color: var(--accent-contrast);
+  background: var(--accent);
+}

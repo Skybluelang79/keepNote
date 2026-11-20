@@ -214,6 +214,7 @@ import { wordCount } from '../../models/note.model';
             <div class="shortcuts-hint">
               <span><kbd>N</kbd> new note</span>
               <span><kbd>/</kbd> search</span>
+              <span><kbd>Ctrl</kbd><kbd>K</kbd> commands</span>
               <span><kbd>Esc</kbd> close</span>
             </div>
           </div>

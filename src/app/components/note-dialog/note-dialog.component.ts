@@ -2,8 +2,14 @@ import { Component, HostListener, computed, effect, inject, signal } from '@angu
 import { AppIcon } from '../app-icon/app-icon.component';
 import { ColorPicker } from '../color-picker/color-picker.component';
 import { NotesService } from '../../services/note.service';
-import { AiService, AiAction } from '../../services/ai.service';
-import { Note, formatRelativeTime, formatReminderTime, parseChecklist, wordCount } from '../../models/note.model';
+import { AiService, AiAction, AiOrganizeResult } from '../../services/ai.service';
+import {
+  Note,
+  formatRelativeTime,
+  formatReminderTime,
+  parseChecklist,
+  wordCount,
+} from '../../models/note.model';
 
 @Component({
   selector: 'note-dialog',
@@ -15,6 +21,7 @@ import { Note, formatRelativeTime, formatReminderTime, parseChecklist, wordCount
         <div
           class="dialog"
           [class.colored]="!!current.color"
+          [class.focus]="notes.focusMode()"
           [style.background]="current.color || 'var(--surface)'"
           (click)="$event.stopPropagation()"
           role="dialog"
@@ -39,6 +46,21 @@ import { Note, formatRelativeTime, formatReminderTime, parseChecklist, wordCount
             >
               <app-icon [name]="current.pinned ? 'pin' : 'pin_off'" />
             </button>
+            <button
+              type="button"
+              class="icon-btn focus-toggle"
+              [class.active]="notes.focusMode()"
+              [attr.aria-label]="notes.focusMode() ? 'Exit focus mode' : 'Enter focus mode'"
+              [title]="notes.focusMode() ? 'Exit focus mode' : 'Focus mode'"
+              (click)="notes.toggleFocusMode()"
+            >
+              <app-icon [name]="notes.focusMode() ? 'fullscreen_exit' : 'fullscreen'" />
+            </button>
+            @if (notes.focusMode()) {
+              <button type="button" class="icon-btn" aria-label="Close note" (click)="notes.closeNote()">
+                <app-icon name="close" />
+              </button>
+            }
           </div>
 
           @if (current.checklist) {
@@ -193,6 +215,35 @@ import { Note, formatRelativeTime, formatReminderTime, parseChecklist, wordCount
                 <app-icon name="checklist" />
                 <span>Extract action items</span>
               </button>
+              <button type="button" class="ai-item" (click)="runAi('tags')">
+                <app-icon name="label" />
+                <span>Suggest labels</span>
+              </button>
+              <button type="button" class="ai-item" (click)="runAi('organize')">
+                <app-icon name="sort" />
+                <span>Smart organize</span>
+              </button>
+              <button type="button" class="ai-item" (click)="runAi('brainstorm')">
+                <app-icon name="bulb_color" />
+                <span>Brainstorm ideas</span>
+              </button>
+              <button type="button" class="ai-item" (click)="customOpen.set(!customOpen())">
+                <app-icon name="sparkle" />
+                <span>Ask anything…</span>
+              </button>
+              @if (customOpen()) {
+                <div class="custom-prompt" (click)="$event.stopPropagation()">
+                  <input
+                    #customInput
+                    class="custom-input"
+                    [value]="customPrompt()"
+                    placeholder="Tell the AI what to do…"
+                    (input)="customPrompt.set($any($event.target).value)"
+                    (keydown.enter)="runCustom(customInput.value)"
+                  />
+                  <button type="button" class="chip ai-apply" (click)="runCustom(customInput.value)">Ask</button>
+                </div>
+              }
             </div>
           }
 
@@ -236,6 +287,15 @@ import { Note, formatRelativeTime, formatReminderTime, parseChecklist, wordCount
                 (click)="aiMenuOpen.set(!aiMenuOpen())"
               >
                 <app-icon name="sparkle" />
+              </button>
+              <button
+                type="button"
+                class="icon-btn"
+                aria-label="AI settings"
+                title="AI settings"
+                (click)="ai.settingsOpen.set(true)"
+              >
+                <app-icon name="settings" />
               </button>
               <button
                 type="button"
@@ -345,6 +405,9 @@ export class NoteDialog {
   protected readonly aiResult = signal<string | null>(null);
   protected readonly aiError = signal<string | null>(null);
   protected readonly aiMode = signal<AiAction | null>(null);
+  protected readonly aiInstruction = signal('');
+  protected readonly customOpen = signal(false);
+  protected readonly customPrompt = signal('');
 
   protected readonly aiTitle = computed(() => {
     switch (this.aiMode()) {
@@ -362,6 +425,14 @@ export class NoteDialog {
         return 'Fix spelling & grammar';
       case 'shorten':
         return 'Shorter version';
+      case 'tags':
+        return 'Suggested labels';
+      case 'organize':
+        return 'Smart organize';
+      case 'brainstorm':
+        return 'Ideas';
+      case 'custom':
+        return 'Custom request';
       default:
         return 'Assistant';
     }
@@ -372,6 +443,8 @@ export class NoteDialog {
     if (mode === 'continue') return 'Append to note';
     if (mode === 'extract') return 'Make checklist';
     if (mode === 'title') return 'Use as title';
+    if (mode === 'tags') return 'Add labels';
+    if (mode === 'organize') return 'Apply structure';
     return 'Replace note';
   });
 
@@ -391,6 +464,7 @@ export class NoteDialog {
 
   @HostListener('window:keydown.escape')
   protected onEscape(): void {
+    if (this.notes.commandPaletteOpen() || this.ai.settingsOpen()) return;
     if (this.note()) this.notes.closeNote();
   }
 
@@ -451,15 +525,24 @@ export class NoteDialog {
     this.notes.download(`${safeName(note.title)}.md`, this.notes.exportMarkdown(note), 'text/markdown');
   }
 
-  async runAi(action: AiAction): Promise<void> {
+  async runCustom(value: string): Promise<void> {
+    const instruction = value.trim();
+    if (!instruction) return;
+    await this.runAi('custom', instruction);
+  }
+
+  async runAi(action: AiAction, instruction = ''): Promise<void> {
     const note = this.note();
     if (!note || this.aiBusy()) return;
     this.aiMenuOpen.set(false);
+    this.customOpen.set(false);
     if (!note.content.trim() && !note.title.trim()) {
       this.aiError.set('There\u2019s nothing to work with yet — add some text to the note first.');
+      this.aiMode.set(action);
       return;
     }
     this.aiMode.set(action);
+    this.aiInstruction.set(instruction);
     this.aiResult.set(null);
     this.aiError.set(null);
     this.aiBusy.set(true);
@@ -468,9 +551,14 @@ export class NoteDialog {
         action,
         title: note.title,
         content: note.content,
+        labels: this.notes.allLabels(),
+        instruction,
       });
       if (text) {
         this.aiResult.set(text);
+        if (this.ai.lastUsedOffline()) {
+          this.notes.showToast('Offline AI result — add a key or deploy /api/ai for live answers');
+        }
       } else {
         this.aiError.set('The AI returned an empty response. Try again.');
       }
@@ -483,7 +571,7 @@ export class NoteDialog {
 
   retryAi(): void {
     const mode = this.aiMode();
-    if (mode) void this.runAi(mode);
+    if (mode) void this.runAi(mode, this.aiInstruction());
   }
 
   applyAi(): void {
@@ -500,6 +588,35 @@ export class NoteDialog {
     } else if (mode === 'title') {
       this.notes.updateNote(note.id, { title: result.trim() });
       this.notes.showToast('Title updated by AI');
+    } else if (mode === 'tags') {
+      const labels = result
+        .split(',')
+        .map((label) => label.trim())
+        .filter(Boolean)
+        .slice(0, 5);
+      for (const label of labels) this.notes.ensureLabel(label);
+      this.notes.updateNote(note.id, { labels: [...new Set([...note.labels, ...labels])] });
+      this.notes.showToast('Labels added by AI');
+    } else if (mode === 'organize') {
+      const parsed = parseAiOrganize(result);
+      if (!parsed) {
+        this.notes.showToast('AI result could not be applied');
+        return;
+      }
+      const labels = parsed.labels.map((label) => label.trim()).filter(Boolean).slice(0, 5);
+      for (const label of labels) this.notes.ensureLabel(label);
+      const tasks = parsed.tasks
+        .map((task) => task.replace(/^- \[[ xX]\]\s*/, '').trim())
+        .filter(Boolean)
+        .map((task) => `- [ ] ${task}`);
+      const content = [parsed.summary || note.content, ...tasks].filter(Boolean).join('\n\n');
+      this.notes.updateNote(note.id, {
+        title: parsed.title || note.title,
+        labels: [...new Set([...note.labels, ...labels])],
+        content,
+        checklist: tasks.length > 0,
+      });
+      this.notes.showToast('Note organized by AI');
     } else {
       this.notes.updateNote(note.id, { content: result });
       this.notes.showToast('Note updated by AI');
@@ -524,11 +641,29 @@ export class NoteDialog {
     this.aiResult.set(null);
     this.aiError.set(null);
     this.aiMode.set(null);
+    this.aiInstruction.set('');
+    this.customOpen.set(false);
   }
 
   autoGrow(el: HTMLTextAreaElement): void {
     el.style.height = 'auto';
     el.style.height = el.scrollHeight + 'px';
+  }
+}
+
+function parseAiOrganize(text: string): AiOrganizeResult | null {
+  try {
+    const cleaned = text.replace(/^```(?:json)?\s*/i, '').replace(/```$/, '').trim();
+    const data = JSON.parse(cleaned) as Partial<AiOrganizeResult>;
+    if (!data || typeof data !== 'object') return null;
+    return {
+      title: typeof data.title === 'string' ? data.title.trim() : '',
+      labels: Array.isArray(data.labels) ? data.labels.map(String) : [],
+      summary: typeof data.summary === 'string' ? data.summary.trim() : '',
+      tasks: Array.isArray(data.tasks) ? data.tasks.map(String) : [],
+    };
+  } catch {
+    return null;
   }
 }
 

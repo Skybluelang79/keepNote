@@ -169,6 +169,8 @@ export class NotesService {
   readonly shortcutsOpen = signal(false);
   readonly sortMode = signal<SortMode>(loadSort());
   readonly layout = signal<LayoutMode>(loadLayout());
+  readonly commandPaletteOpen = signal(false);
+  readonly focusMode = signal(false);
 
   private toastTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -225,6 +227,10 @@ export class NotesService {
     } catch {
       /* ignore */
     }
+  }
+
+  toggleFocusMode(): void {
+    this.focusMode.set(!this.focusMode());
   }
 
   readonly selectedNotes = computed(() =>
@@ -494,6 +500,16 @@ export class NotesService {
     this.setActiveLabel(trimmed);
   }
 
+  ensureLabel(name: string): void {
+    const trimmed = name.trim();
+    if (!trimmed) return;
+    const exists = this.allLabels().some((label) => label.toLowerCase() === trimmed.toLowerCase());
+    if (!exists) {
+      this.labels.update((list) => [...list, trimmed]);
+      this.persistLabels();
+    }
+  }
+
   removeLabel(label: string): void {
     this.labels.update((list) => list.filter((l) => l !== label));
     this.notes.update((list) =>
@@ -534,6 +550,7 @@ export class NotesService {
 
   closeNote(): void {
     this.editingId.set(null);
+    this.focusMode.set(false);
   }
 
   // --- Export / import ---

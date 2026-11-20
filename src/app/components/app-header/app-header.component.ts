@@ -3,6 +3,7 @@ import { AppIcon } from '../app-icon/app-icon.component';
 import { ThemeService } from '../../services/theme.service';
 import { NotesService } from '../../services/note.service';
 import { SyncService } from '../../services/sync.service';
+import { AiService } from '../../services/ai.service';
 
 @Component({
   selector: 'app-header',
@@ -96,6 +97,15 @@ import { SyncService } from '../../services/sync.service';
             <button type="button" class="dropdown-item" (click)="fileInput.click()">
               <app-icon name="upload" />
               <span>Import notes (.json)</span>
+            </button>
+            <div class="dropdown-title">Quick actions</div>
+            <button type="button" class="dropdown-item" (click)="openCommandPalette()">
+              <app-icon name="command" />
+              <span>Command palette</span>
+            </button>
+            <button type="button" class="dropdown-item" (click)="openAiSettings()">
+              <app-icon name="key" />
+              <span>AI settings</span>
             </button>
             <div class="dropdown-title">Help</div>
             <button type="button" class="dropdown-item" (click)="openShortcuts()">
@@ -197,6 +207,7 @@ export class AppHeader {
   protected readonly theme = inject(ThemeService);
   protected readonly notes = inject(NotesService);
   protected readonly sync = inject(SyncService);
+  protected readonly ai = inject(AiService);
   protected readonly menuOpen = signal(false);
   protected readonly accountOpen = signal(false);
   protected readonly mobileSearchOpen = signal(false);
@@ -263,6 +274,16 @@ export class AppHeader {
   openShortcuts(): void {
     this.menuOpen.set(false);
     this.notes.shortcutsOpen.set(true);
+  }
+
+  openCommandPalette(): void {
+    this.menuOpen.set(false);
+    this.notes.commandPaletteOpen.set(true);
+  }
+
+  openAiSettings(): void {
+    this.menuOpen.set(false);
+    this.ai.settingsOpen.set(true);
   }
 
   exportAll(): void {

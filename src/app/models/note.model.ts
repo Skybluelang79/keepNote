@@ -52,6 +52,30 @@ export const NOTE_TEMPLATES: NoteTemplate[] = [
     title: 'Meeting notes',
     content: 'Agenda:\n\nDecisions:\n\nAction items:',
   },
+  {
+    name: 'Daily standup',
+    icon: 'access_time',
+    title: 'Daily standup',
+    content: 'Yesterday:\n\nToday:\n\nBlockers:',
+  },
+  {
+    name: 'Project brief',
+    icon: 'title',
+    title: 'Project brief',
+    content: 'Goal:\n\nWhy it matters:\n\nScope:\n\nSuccess metrics:\n\nOpen questions:',
+  },
+  {
+    name: 'Research notes',
+    icon: 'lightbulb',
+    title: 'Research notes',
+    content: 'Question:\n\nSources:\n\nFindings:\n\nNext steps:',
+  },
+  {
+    name: 'Journal entry',
+    icon: 'templates',
+    title: 'Journal',
+    content: 'Today I noticed:\n\nI feel:\n\nGrateful for:\n\nTomorrow I will:',
+  },
 ];
 
 export function parseChecklist(content: string): ChecklistItem[] | null {
