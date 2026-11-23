@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#3b0510"/>
+      <stop offset="0.48" stop-color="#a51224"/>
+      <stop offset="1" stop-color="#ff9a3c"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#ffd58a" stop-opacity="0.95"/>
+      <stop offset="0.45" stop-color="#ff7048" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#7d0717" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="ribbon" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#5d0616"/>
+      <stop offset="0.25" stop-color="#e02b34"/>
+      <stop offset="0.52" stop-color="#ff8a4c"/>
+      <stop offset="0.75" stop-color="#c31328"/>
+      <stop offset="1" stop-color="#4c0412"/>
+    </linearGradient>
+    <linearGradient id="glass" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.06"/>
+      <stop offset="0.18" stop-color="#ffffff" stop-opacity="0.42"/>
+      <stop offset="0.34" stop-color="#ffffff" stop-opacity="0.08"/>
+      <stop offset="0.7" stop-color="#ffffff" stop-opacity="0.02"/>
+      <stop offset="0.88" stop-color="#ffffff" stop-opacity="0.3"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0.05"/>
+    </linearGradient>
+    <radialGradient id="bubble" cx="0.32" cy="0.28" r="0.72">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.9"/>
+      <stop offset="0.24" stop-color="#ffd8a8" stop-opacity="0.32"/>
+      <stop offset="0.7" stop-color="#ff5b4a" stop-opacity="0.12"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0.02"/>
+    </radialGradient>
+    <filter id="blur40" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="40"/>
+    </filter>
+    <filter id="blur12" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="12"/>
+    </filter>
+  </defs>
+
+  <rect width="1600" height="1000" fill="url(#bg)"/>
+  <ellipse cx="1150" cy="260" rx="520" ry="420" fill="url(#glow)" filter="url(#blur40)"/>
+  <ellipse cx="260" cy="840" rx="460" ry="320" fill="#ff5a3c" opacity="0.35" filter="url(#blur40)"/>
+
+  <path d="M-180 720 C 240 420, 540 1010, 930 620 S 1500 180, 1780 430"
+        stroke="#4c0412" stroke-width="210" fill="none" opacity="0.45" filter="url(#blur40)"/>
+  <path d="M-200 690 C 220 390, 560 980, 950 590 S 1510 150, 1800 400"
+        stroke="url(#ribbon)" stroke-width="150" fill="none" stroke-linecap="round"/>
+  <path d="M-200 680 C 220 380, 560 970, 950 580 S 1510 140, 1800 390"
+        stroke="#ffd8b0" stroke-width="10" fill="none" opacity="0.28"/>
+
+  <g transform="translate(1030 120)">
+    <ellipse cx="170" cy="810" rx="210" ry="38" fill="#2b0108" opacity="0.5" filter="url(#blur12)"/>
+    <path d="M92 250 C 92 205, 104 178, 122 160 L122 92 C122 62, 138 44, 170 44 C202 44, 218 62, 218 92 L218 160 C236 178, 248 205, 248 250 L286 696 C292 770, 250 812, 170 812 C90 812, 48 770, 54 696 Z"
+          fill="#8a0b1d" opacity="0.86"/>
+    <path d="M104 252 C104 212, 118 184, 136 168 L136 104 C136 86, 146 76, 170 76 C194 76, 204 86, 204 104 L204 168 C222 184, 236 212, 236 252 L272 690 C276 752, 244 786, 170 786 C96 786, 64 752, 68 690 Z"
+          fill="url(#glass)"/>
+    <path d="M150 190 C128 300, 122 500, 128 742" stroke="#ffffff" stroke-width="14" stroke-linecap="round" opacity="0.44" fill="none"/>
+    <path d="M212 210 C230 340, 238 540, 226 716" stroke="#ffe5c4" stroke-width="6" stroke-linecap="round" opacity="0.3" fill="none"/>
+    <rect x="120" y="48" width="100" height="48" rx="14" fill="#e8b15e" opacity="0.9"/>
+    <rect x="132" y="36" width="76" height="22" rx="10" fill="#ffe0a3" opacity="0.75"/>
+  </g>
+
+  <g fill="url(#bubble)" stroke="#ffffff" stroke-opacity="0.18">
+    <circle cx="150" cy="180" r="34"><animate attributeName="cy" values="180;120;180" dur="9s" repeatCount="indefinite"/></circle>
+    <circle cx="310" cy="310" r="18"><animate attributeName="cy" values="310;240;310" dur="7s" repeatCount="indefinite"/></circle>
+    <circle cx="520" cy="140" r="26"><animate attributeName="cy" values="140;90;140" dur="11s" repeatCount="indefinite"/></circle>
+    <circle cx="720" cy="820" r="22"><animate attributeName="cy" values="820;760;820" dur="8s" repeatCount="indefinite"/></circle>
+    <circle cx="870" cy="300" r="40"><animate attributeName="cy" values="300;250;300" dur="12s" repeatCount="indefinite"/></circle>
+    <circle cx="1320" cy="180" r="24"><animate attributeName="cy" values="180;120;180" dur="10s" repeatCount="indefinite"/></circle>
+    <circle cx="1480" cy="640" r="32"><animate attributeName="cy" values="640;570;640" dur="13s" repeatCount="indefinite"/></circle>
+    <circle cx="420" cy="600" r="14"><animate attributeName="cy" values="600;540;600" dur="6s" repeatCount="indefinite"/></circle>
+  </g>
+</svg>

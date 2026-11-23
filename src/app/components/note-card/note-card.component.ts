@@ -1,13 +1,19 @@
 import { Component, Input, computed, inject, signal } from '@angular/core';
-import { Note, formatReminderTime, parseChecklist } from '../../models/note.model';
+import {
+  Note,
+  formatRelativeTime,
+  formatReminderTime,
+  parseChecklist,
+} from '../../models/note.model';
 import { AppIcon } from '../app-icon/app-icon.component';
 import { ColorPicker } from '../color-picker/color-picker.component';
+import { RichTextPipe } from '../../shared/pipes/rich-text.pipe';
 import { NotesService } from '../../services/note.service';
 
 @Component({
   selector: 'note-card',
   standalone: true,
-  imports: [AppIcon, ColorPicker],
+  imports: [AppIcon, ColorPicker, RichTextPipe],
   template: `
     <article
       class="note-card"
@@ -51,9 +57,14 @@ import { NotesService } from '../../services/note.service';
       }
 
       <div class="card-inner">
-        @if (note.title) {
-          <h2 class="card-title">{{ note.title }}</h2>
-        }
+        <div class="card-head">
+          @if (note.title) {
+            <h2 class="card-title">{{ note.title }}</h2>
+          }
+          @if (note.checklist) {
+            <span class="type-pill"><app-icon name="checklist" /> {{ progress() }}%</span>
+          }
+        </div>
 
         @if (note.checklist && checklist().length) {
           <div class="checklist" [class.compact]="!notes.selecting() && checklist().length > 4">
@@ -78,19 +89,22 @@ import { NotesService } from '../../services/note.service';
             </div>
           </div>
         } @else if (!note.checklist && note.content) {
-          <p class="card-body">{{ note.content }}</p>
+          <div class="card-body rich-text rich-clamp" [innerHTML]="note.content | richText"></div>
         }
 
-        @if (note.labels.length) {
-          <div class="card-labels">
-            @for (label of note.labels; track label) {
-              <span class="chip" (click)="$event.stopPropagation(); notes.setActiveLabel(label)">
-                <app-icon name="label" />
-                <span class="label">{{ label }}</span>
-              </span>
-            }
-          </div>
-        }
+        <div class="card-meta">
+          <span class="card-time">edited {{ relativeTime(note.updatedAt) }}</span>
+          @if (note.labels.length) {
+            <div class="card-labels">
+              @for (label of note.labels; track label) {
+                <span class="chip" (click)="$event.stopPropagation(); notes.setActiveLabel(label)">
+                  <app-icon name="label" />
+                  <span class="label">{{ label }}</span>
+                </span>
+              }
+            </div>
+          }
+        </div>
       </div>
 
       @if (paletteOpen()) {
@@ -189,6 +203,7 @@ export class NoteCard {
   @Input({ required: true }) note!: Note;
   @Input() layout: 'cards' | 'list' = 'cards';
   protected readonly notes = inject(NotesService);
+  protected readonly relativeTime = formatRelativeTime;
   protected hover = false;
   protected over = false;
   protected readonly paletteOpen = signal(false);

@@ -19,6 +19,7 @@ export interface AiRequest {
   content: string;
   labels?: string[];
   instruction?: string;
+  authToken?: string;
 }
 
 export interface AiOrganizeResult {
@@ -56,14 +57,18 @@ export class AiService {
     this.lastUsedOffline.set(false);
     const headers: Record<string, string> = { 'Content-Type': 'application/json' };
     const key = this.apiKey().trim();
+    const authToken = request.authToken?.trim();
     if (key) headers['x-gemini-api-key'] = key;
+    if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
 
+    const body = { ...request };
+    delete body.authToken;
     let res: Response;
     try {
       res = await fetch('/api/ai', {
         method: 'POST',
         headers,
-        body: JSON.stringify(request),
+        body: JSON.stringify(body),
       });
     } catch {
       return this.fallback(request);
@@ -71,7 +76,15 @@ export class AiService {
 
     if (!res.ok) {
       const message = await this.readError(res);
-      if (res.status === 404 || message === 'AI_NOT_CONFIGURED') return this.fallback(request);
+      if (
+        res.status === 401 ||
+        res.status === 404 ||
+        message === 'AI_NOT_CONFIGURED' ||
+        message === 'AI_AUTH_REQUIRED' ||
+        message === 'AI_AUTH_NOT_CONFIGURED'
+      ) {
+        return this.fallback(request);
+      }
       throw new Error(message);
     }
 

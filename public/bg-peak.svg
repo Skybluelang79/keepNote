@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#9fc8e8"/>
+      <stop offset="0.45" stop-color="#eaf6fd"/>
+      <stop offset="1" stop-color="#f2dfc3"/>
+    </linearGradient>
+    <linearGradient id="peak" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#a9c5d8"/>
+    </linearGradient>
+    <linearGradient id="milk" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#d9e7f1"/>
+      <stop offset="0.2" stop-color="#ffffff"/>
+      <stop offset="0.55" stop-color="#f6e7d2"/>
+      <stop offset="0.8" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#c5d6e4"/>
+    </linearGradient>
+    <radialGradient id="halo" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.95"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="drop" cx="0.32" cy="0.26" r="0.74">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.95"/>
+      <stop offset="0.35" stop-color="#ffffff" stop-opacity="0.42"/>
+      <stop offset="1" stop-color="#cfe0ec" stop-opacity="0.04"/>
+    </radialGradient>
+    <filter id="blur32" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="32"/>
+    </filter>
+    <filter id="blur10" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="10"/>
+    </filter>
+  </defs>
+
+  <rect width="1600" height="1000" fill="url(#sky)"/>
+  <circle cx="1120" cy="260" r="360" fill="url(#halo)" filter="url(#blur32)">
+    <animate attributeName="r" values="340;380;340" dur="12s" repeatCount="indefinite"/>
+  </circle>
+
+  <g opacity="0.72">
+    <path d="M-80 720 L300 280 L560 590 L760 360 L1120 760 Z" fill="url(#peak)"/>
+    <path d="M300 280 L410 410 L350 430 L275 390 Z" fill="#ffffff" opacity="0.9"/>
+    <path d="M760 360 L850 470 L790 485 L720 445 Z" fill="#ffffff" opacity="0.9"/>
+  </g>
+
+  <path d="M-120 880 C 260 700, 520 940, 880 760 S 1450 640, 1740 820"
+        stroke="#ffffff" stroke-width="180" fill="none" opacity="0.32" filter="url(#blur32)"/>
+  <path d="M-120 900 C 260 720, 520 960, 880 780 S 1450 660, 1740 840"
+        stroke="#ffffff" stroke-width="28" fill="none" opacity="0.5"/>
+
+  <g transform="translate(980 180)">
+    <ellipse cx="210" cy="760" rx="220" ry="34" fill="#6f8ba0" opacity="0.28" filter="url(#blur10)"/>
+    <path d="M92 250 C92 214 104 188 122 170 L122 108 C122 76 142 58 210 58 C278 58 298 76 298 108 L298 170 C316 188 328 214 328 250 L366 684 C372 762 326 806 210 806 C94 806 48 762 54 684 Z"
+          fill="#cddce7" opacity="0.58"/>
+    <path d="M112 252 C112 220 124 198 142 182 L142 122 C142 100 156 88 210 88 C264 88 278 100 278 122 L278 182 C296 198 308 220 308 252 L344 680 C348 744 312 780 210 780 C108 780 72 744 76 680 Z"
+          fill="url(#milk)"/>
+    <path d="M154 200 C132 320 128 520 136 720" stroke="#ffffff" stroke-width="15" stroke-linecap="round" opacity="0.7" fill="none"/>
+    <path d="M266 210 C284 350 290 540 278 710" stroke="#ffffff" stroke-width="7" stroke-linecap="round" opacity="0.5" fill="none"/>
+    <path d="M120 244 C168 268 250 268 302 244" stroke="#ffffff" stroke-width="5" fill="none" opacity="0.6"/>
+  </g>
+
+  <path d="M470 -80 C 390 160, 760 260, 650 440 C 580 560, 760 620, 830 700"
+        stroke="url(#milk)" stroke-width="92" fill="none" stroke-linecap="round" opacity="0.94">
+    <animate attributeName="d"
+      values="M470 -80 C 390 160, 760 260, 650 440 C 580 560, 760 620, 830 700;
+              M500 -80 C 430 170, 790 250, 680 430 C 610 550, 790 610, 860 690;
+              M470 -80 C 390 160, 760 260, 650 440 C 580 560, 760 620, 830 700"
+      dur="6s" repeatCount="indefinite"/>
+  </path>
+  <path d="M470 -80 C 390 160, 760 260, 650 440 C 580 560, 760 620, 830 700"
+        stroke="#ffffff" stroke-width="10" fill="none" opacity="0.65"/>
+
+  <g fill="url(#drop)" stroke="#ffffff" stroke-opacity="0.28">
+    <circle cx="560" cy="500" r="26"><animate attributeName="cy" values="500;440;500" dur="7s" repeatCount="indefinite"/></circle>
+    <circle cx="720" cy="610" r="18"><animate attributeName="cy" values="610;540;610" dur="5s" repeatCount="indefinite"/></circle>
+    <circle cx="860" cy="470" r="34"><animate attributeName="cy" values="470;410;470" dur="9s" repeatCount="indefinite"/></circle>
+    <circle cx="1260" cy="520" r="22"><animate attributeName="cy" values="520;460;520" dur="8s" repeatCount="indefinite"/></circle>
+    <circle cx="380" cy="700" r="16"><animate attributeName="cy" values="700;640;700" dur="6s" repeatCount="indefinite"/></circle>
+  </g>
+</svg>

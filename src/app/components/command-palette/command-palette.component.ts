@@ -3,6 +3,7 @@ import { AppIcon, IconName } from '../app-icon/app-icon.component';
 import { NotesService } from '../../services/note.service';
 import { ThemeService } from '../../services/theme.service';
 import { AiService } from '../../services/ai.service';
+import { PremiumService } from '../../services/premium.service';
 
 interface Command {
   id: string;
@@ -69,6 +70,7 @@ export class CommandPalette {
   protected readonly notes = inject(NotesService);
   protected readonly theme = inject(ThemeService);
   protected readonly ai = inject(AiService);
+  protected readonly premium = inject(PremiumService);
   protected readonly query = signal('');
   protected readonly activeIndex = signal(0);
 
@@ -173,6 +175,20 @@ export class CommandPalette {
             .join('\n\n'),
           'text/markdown',
         ),
+    },
+    {
+      id: 'premium',
+      label: 'Premium plans',
+      hint: 'Monthly and yearly subscriptions',
+      icon: 'sparkle',
+      run: () => this.premium.open('plans'),
+    },
+    {
+      id: 'backgrounds',
+      label: 'Change background',
+      hint: 'Free and premium studio scenes',
+      icon: 'palette',
+      run: () => this.premium.open('backgrounds'),
     },
     {
       id: 'shortcuts',

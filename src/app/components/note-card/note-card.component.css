@@ -40,7 +40,13 @@
 .card-inner {
   padding-bottom: 4px;
   word-break: break-word;
-  white-space: pre-wrap;
+}
+
+.card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
 }
 
 .card-title {
@@ -52,18 +58,51 @@
   padding-right: 22px;
 }
 
+.type-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  flex: 0 0 auto;
+  margin-top: 2px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+.type-pill svg {
+  width: 12px;
+  height: 12px;
+}
+
 .card-body {
   font-size: 13.5px;
   line-height: 1.55;
   color: var(--text-2, #3c4043);
-  white-space: pre-wrap;
+}
+
+.card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px 10px;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+
+.card-time {
+  font-size: 10.5px;
+  color: var(--text-3);
+  white-space: nowrap;
 }
 
 .card-labels {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  margin-top: 10px;
 }
 
 .chip {
@@ -249,8 +288,16 @@
 .note-card.colored .todo-row {
   color: #202124;
 }
-.note-card.colored .card-body {
+.note-card.colored .card-body,
+.note-card.colored .card-time {
   color: #3c4043;
+}
+.note-card.colored .card-meta {
+  border-color: rgba(0, 0, 0, 0.12);
+}
+.note-card.colored .type-pill {
+  color: #202124;
+  background: rgba(0, 0, 0, 0.09);
 }
 .note-card.colored .icon-btn {
   color: #3c4043;

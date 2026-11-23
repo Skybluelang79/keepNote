@@ -1,8 +1,18 @@
-import { Component, HostListener, computed, effect, inject, signal } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  HostListener,
+  ViewChild,
+  computed,
+  effect,
+  inject,
+  signal,
+} from '@angular/core';
 import { AppIcon } from '../app-icon/app-icon.component';
 import { ColorPicker } from '../color-picker/color-picker.component';
 import { NotesService } from '../../services/note.service';
 import { AiService, AiAction, AiOrganizeResult } from '../../services/ai.service';
+import { SyncService } from '../../services/sync.service';
 import {
   Note,
   formatRelativeTime,
@@ -10,11 +20,18 @@ import {
   parseChecklist,
   wordCount,
 } from '../../models/note.model';
+import {
+  BlockFormat,
+  InlineFormat,
+  applyBlockFormat,
+  applyInlineFormat,
+} from '../../models/note-format.model';
+import { RichTextPipe } from '../../shared/pipes/rich-text.pipe';
 
 @Component({
   selector: 'note-dialog',
   standalone: true,
-  imports: [AppIcon, ColorPicker],
+  imports: [AppIcon, ColorPicker, RichTextPipe],
   template: `
     @if (note(); as current) {
       <div class="overlay" (click)="notes.closeNote()">
@@ -63,6 +80,34 @@ import {
             }
           </div>
 
+          @if (current.labels.length) {
+            <div class="meta-block">
+              <span class="section-label">Labels</span>
+              <div class="dialog-labels">
+                @for (label of current.labels; track label) {
+                  <span class="chip">
+                    <app-icon name="label" />
+                    <span class="label">{{ label }}</span>
+                  </span>
+                }
+              </div>
+            </div>
+          }
+
+          <div class="editor-section-head">
+            <span class="section-label">Content</span>
+            @if (!current.checklist) {
+              <button
+                type="button"
+                class="preview-toggle"
+                [class.active]="preview()"
+                (click)="preview.set(!preview())"
+              >
+                {{ preview() ? 'Edit text' : 'Preview' }}
+              </button>
+            }
+          </div>
+
           @if (current.checklist) {
             <div class="checklist-editor">
               @for (item of checklistItems(current); track $index; let i = $index) {
@@ -96,25 +141,44 @@ import {
                 />
               </div>
             </div>
+          } @else if (preview()) {
+            <div class="editor-preview rich-text" [innerHTML]="current.content | richText"></div>
           } @else {
-            <textarea
-              class="field content"
-              [value]="current.content"
-              placeholder="Note"
-              rows="6"
-              (input)="notes.updateNote(current.id, { content: $any($event.target).value })"
-            ></textarea>
-          }
-
-          @if (current.labels.length) {
-            <div class="dialog-labels">
-              @for (label of current.labels; track label) {
-                <span class="chip">
-                  <app-icon name="label" />
-                  <span class="label">{{ label }}</span>
-                </span>
+            <div class="format-toolbar" role="toolbar" aria-label="Text formatting">
+              @for (action of inlineFormats; track action.id) {
+                <button
+                  type="button"
+                  [attr.class]="'format-btn ' + action.className"
+                  [title]="action.title"
+                  [attr.aria-label]="action.title"
+                  (click)="applyInline(action.kind)"
+                >{{ action.label }}</button>
+              }
+              <span class="toolbar-sep"></span>
+              @for (action of blockFormats; track action.id) {
+                <button
+                  type="button"
+                  class="format-btn block-btn"
+                  [title]="action.title"
+                  [attr.aria-label]="action.title"
+                  (click)="applyBlock(action.kind)"
+                >{{ action.label }}</button>
               }
             </div>
+            <textarea
+              #bodyEditor
+              class="field content"
+              [value]="current.content"
+              placeholder="Write something brilliant… use the toolbar for bold, italic, lists and more"
+              rows="6"
+              (input)="notes.updateNote(current.id, { content: $any($event.target).value })"
+              (keydown.control.b)="onFormatKey($any($event), 'bold')"
+              (keydown.meta.b)="onFormatKey($any($event), 'bold')"
+              (keydown.control.i)="onFormatKey($any($event), 'italic')"
+              (keydown.meta.i)="onFormatKey($any($event), 'italic')"
+              (keydown.control.u)="onFormatKey($any($event), 'underline')"
+              (keydown.meta.u)="onFormatKey($any($event), 'underline')"
+            ></textarea>
           }
 
           @if (reminderOpen()) {
@@ -181,8 +245,16 @@ import {
             }
           </div>
 
-          <div class="dialog-stats">
-            {{ stats(current) }}
+          <div class="editor-meta">
+            <span class="section-label">Details</span>
+            <div class="stat-pills">
+              <span>{{ wordCountFn(current.content) }} words</span>
+              <span>{{ current.content.length }} chars</span>
+              <span>edited {{ relativeTimeFn(current.updatedAt) }}</span>
+              @if (current.createdAt !== current.updatedAt) {
+                <span>created {{ relativeTimeFn(current.createdAt) }}</span>
+              }
+            </div>
           </div>
 
           @if (aiMenuOpen()) {
@@ -397,6 +469,7 @@ import {
 export class NoteDialog {
   protected readonly notes = inject(NotesService);
   protected readonly ai = inject(AiService);
+  protected readonly sync = inject(SyncService);
   protected readonly paletteOpen = signal(false);
   protected readonly labelsOpen = signal(false);
   protected readonly reminderOpen = signal(false);
@@ -408,6 +481,38 @@ export class NoteDialog {
   protected readonly aiInstruction = signal('');
   protected readonly customOpen = signal(false);
   protected readonly customPrompt = signal('');
+  protected readonly preview = signal(false);
+
+  @ViewChild('bodyEditor') bodyEditor?: ElementRef<HTMLTextAreaElement>;
+
+  protected readonly inlineFormats: Array<{
+    id: string;
+    label: string;
+    title: string;
+    className: string;
+    kind: InlineFormat;
+  }> = [
+    { id: 'bold', label: 'B', title: 'Bold (Ctrl+B)', className: 'bold', kind: 'bold' },
+    { id: 'italic', label: 'I', title: 'Italic (Ctrl+I)', className: 'italic', kind: 'italic' },
+    { id: 'underline', label: 'U', title: 'Underline (Ctrl+U)', className: 'underline', kind: 'underline' },
+    { id: 'strike', label: 'S', title: 'Strikethrough', className: 'strike', kind: 'strike' },
+    { id: 'code', label: '</>', title: 'Inline code', className: 'mono', kind: 'code' },
+    { id: 'highlight', label: '==', title: 'Highlight', className: 'marker', kind: 'highlight' },
+    { id: 'link', label: '↗', title: 'Insert link', className: 'link-format', kind: 'link' },
+  ];
+
+  protected readonly blockFormats: Array<{
+    id: string;
+    label: string;
+    title: string;
+    kind: BlockFormat;
+  }> = [
+    { id: 'heading', label: 'H', title: 'Heading', kind: 'heading' },
+    { id: 'quote', label: '❝', title: 'Quote', kind: 'quote' },
+    { id: 'bullet', label: '•', title: 'Bullet list', kind: 'bullet' },
+    { id: 'numbered', label: '1.', title: 'Numbered list', kind: 'numbered' },
+    { id: 'divider', label: '—', title: 'Divider', kind: 'divider' },
+  ];
 
   protected readonly aiTitle = computed(() => {
     switch (this.aiMode()) {
@@ -450,6 +555,8 @@ export class NoteDialog {
 
   protected readonly note = this.notes.editingNote;
   protected readonly formatReminderTimeFn = formatReminderTime;
+  protected readonly wordCountFn = wordCount;
+  protected readonly relativeTimeFn = formatRelativeTime;
 
   constructor() {
     effect(() => {
@@ -457,6 +564,7 @@ export class NoteDialog {
         this.paletteOpen.set(false);
         this.labelsOpen.set(false);
         this.reminderOpen.set(false);
+        this.preview.set(false);
         this.dismissAi();
       }
     });
@@ -483,6 +591,38 @@ export class NoteDialog {
     this.notes.addChecklistItem(note.id, text);
     input.value = '';
     input.focus();
+  }
+
+  applyInline(format: InlineFormat): void {
+    const el = this.bodyEditor?.nativeElement;
+    if (!el) return;
+    this.writeFormat(
+      applyInlineFormat(el.value, el.selectionStart, el.selectionEnd, format),
+    );
+  }
+
+  applyBlock(format: BlockFormat): void {
+    const el = this.bodyEditor?.nativeElement;
+    if (!el) return;
+    this.writeFormat(applyBlockFormat(el.value, el.selectionStart, el.selectionEnd, format));
+  }
+
+  onFormatKey(event: KeyboardEvent, format: InlineFormat): void {
+    event.preventDefault();
+    this.applyInline(format);
+  }
+
+  private writeFormat(result: { text: string; start: number; end: number }): void {
+    const note = this.note();
+    if (!note) return;
+    this.notes.updateNote(note.id, { content: result.text });
+    requestAnimationFrame(() => {
+      const el = this.bodyEditor?.nativeElement;
+      if (!el) return;
+      el.value = result.text;
+      el.focus();
+      el.setSelectionRange(result.start, result.end);
+    });
   }
 
   toggleLabel(note: Note, label: string): void {
@@ -547,17 +687,19 @@ export class NoteDialog {
     this.aiError.set(null);
     this.aiBusy.set(true);
     try {
+      const authToken = (await this.sync.getIdToken()) ?? undefined;
       const text = await this.ai.generate({
         action,
         title: note.title,
         content: note.content,
         labels: this.notes.allLabels(),
         instruction,
+        authToken,
       });
       if (text) {
         this.aiResult.set(text);
         if (this.ai.lastUsedOffline()) {
-          this.notes.showToast('Offline AI result — add a key or deploy /api/ai for live answers');
+          this.notes.showToast('Offline AI result — sign in or add your own key for live answers');
         }
       } else {
         this.aiError.set('The AI returned an empty response. Try again.');

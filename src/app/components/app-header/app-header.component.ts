@@ -4,6 +4,7 @@ import { ThemeService } from '../../services/theme.service';
 import { NotesService } from '../../services/note.service';
 import { SyncService } from '../../services/sync.service';
 import { AiService } from '../../services/ai.service';
+import { PremiumService } from '../../services/premium.service';
 
 @Component({
   selector: 'app-header',
@@ -66,6 +67,18 @@ import { AiService } from '../../services/ai.service';
 
       <button
         type="button"
+        class="premium-btn"
+        [class.active]="premium.isPremium()"
+        aria-label="KeepNote Premium"
+        title="Premium & backgrounds"
+        (click)="openPremium()"
+      >
+        <app-icon name="sparkle" />
+        <span>PRO</span>
+      </button>
+
+      <button
+        type="button"
         class="icon-btn theme-toggle"
         [attr.aria-label]="theme.isDark() ? 'Switch to light mode' : 'Switch to dark mode'"
         (click)="theme.toggle()"
@@ -97,6 +110,15 @@ import { AiService } from '../../services/ai.service';
             <button type="button" class="dropdown-item" (click)="fileInput.click()">
               <app-icon name="upload" />
               <span>Import notes (.json)</span>
+            </button>
+            <div class="dropdown-title">Appearance &amp; premium</div>
+            <button type="button" class="dropdown-item" (click)="openPremium('backgrounds')">
+              <app-icon name="palette" />
+              <span>Change background</span>
+            </button>
+            <button type="button" class="dropdown-item" (click)="openPremium('plans')">
+              <app-icon name="sparkle" />
+              <span>Premium plans</span>
             </button>
             <div class="dropdown-title">Quick actions</div>
             <button type="button" class="dropdown-item" (click)="openCommandPalette()">
@@ -208,6 +230,7 @@ export class AppHeader {
   protected readonly notes = inject(NotesService);
   protected readonly sync = inject(SyncService);
   protected readonly ai = inject(AiService);
+  protected readonly premium = inject(PremiumService);
   protected readonly menuOpen = signal(false);
   protected readonly accountOpen = signal(false);
   protected readonly mobileSearchOpen = signal(false);
@@ -284,6 +307,12 @@ export class AppHeader {
   openAiSettings(): void {
     this.menuOpen.set(false);
     this.ai.settingsOpen.set(true);
+  }
+
+  openPremium(tab: 'plans' | 'backgrounds' = 'plans'): void {
+    this.menuOpen.set(false);
+    this.accountOpen.set(false);
+    this.premium.open(tab);
   }
 
   exportAll(): void {

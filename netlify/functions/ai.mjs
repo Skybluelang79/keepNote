@@ -1,6 +1,9 @@
 const MODEL = process.env.GEMINI_MODEL || 'gemini-2.0-flash';
 const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(MODEL)}:generateContent`;
+const FIREBASE_WEB_API_KEY = process.env.FIREBASE_WEB_API_KEY || '';
+const AUTH_LOOKUP_URL = `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${encodeURIComponent(FIREBASE_WEB_API_KEY)}`;
 const MAX_INPUT = 8000;
+const verifiedTokens = new Map();
 
 const PROMPTS = {
   summarize: (title, text) =>
@@ -60,11 +63,49 @@ const ok = (body, statusCode = 200) => ({
   headers: {
     'Content-Type': 'application/json',
     'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'Content-Type, x-gemini-api-key',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-gemini-api-key',
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
   },
   body: JSON.stringify(body),
 });
+
+const authError = (code, status = 401) =>
+  ok(
+    {
+      error: code,
+      message: 'Sign in to KeepNote or add your own Gemini key in AI settings.',
+    },
+    status,
+  );
+
+const verifyFirebaseToken = async (token) => {
+  if (!FIREBASE_WEB_API_KEY) return { ok: false, error: 'AI_AUTH_NOT_CONFIGURED' };
+  if (!token || typeof token !== 'string' || token.length > 4096) {
+    return { ok: false, error: 'AI_AUTH_REQUIRED' };
+  }
+
+  const cached = verifiedTokens.get(token);
+  if (cached && cached.expires > Date.now()) return { ok: true, uid: cached.uid };
+
+  try {
+    const res = await fetch(AUTH_LOOKUP_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ idToken: token }),
+    });
+    if (!res.ok) return { ok: false, error: 'AI_AUTH_REQUIRED' };
+
+    const data = await res.json();
+    const uid = data?.users?.[0]?.localId;
+    if (!uid) return { ok: false, error: 'AI_AUTH_REQUIRED' };
+
+    if (verifiedTokens.size > 1000) verifiedTokens.clear();
+    verifiedTokens.set(token, { uid: String(uid), expires: Date.now() + 5 * 60 * 1000 });
+    return { ok: true, uid: String(uid) };
+  } catch {
+    return { ok: false, error: 'AI_AUTH_REQUIRED' };
+  }
+};
 
 export const handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') {
@@ -93,11 +134,30 @@ export const handler = async (event) => {
     ? labels.map((label) => String(label).trim().slice(0, 40)).filter(Boolean).slice(0, 20)
     : [];
 
-  const headerKey =
-    event.headers?.['x-gemini-api-key'] || event.headers?.['X-Gemini-Api-Key'] || '';
-  const apiKey = String(payload.apiKey || headerKey || process.env.GEMINI_API_KEY || '')
+  const headerKey = String(
+    event.headers?.['x-gemini-api-key'] || event.headers?.['X-Gemini-Api-Key'] || '',
+  )
     .trim()
     .slice(0, 256);
+  const payloadKey = String(payload.apiKey || '')
+    .trim()
+    .slice(0, 256);
+  const byoKey = headerKey || payloadKey;
+
+  if (!byoKey) {
+    const authorization = String(
+      event.headers?.authorization || event.headers?.Authorization || '',
+    );
+    const idToken = /^Bearer\s+(.+)$/i.exec(authorization)?.[1]?.trim() || '';
+    if (!idToken) return authError('AI_AUTH_REQUIRED');
+
+    const auth = await verifyFirebaseToken(idToken);
+    if (!auth.ok) {
+      return authError(auth.error, auth.error === 'AI_AUTH_NOT_CONFIGURED' ? 500 : 401);
+    }
+  }
+
+  const apiKey = byoKey || String(process.env.GEMINI_API_KEY || '').trim();
   if (!apiKey) return ok({ error: 'AI_NOT_CONFIGURED' }, 500);
 
   const prompt = PROMPTS[action](safeTitle, truncated, safeInstruction || safeLabels.join(', '));

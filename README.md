@@ -18,6 +18,9 @@ Built with **Angular 20**, zero UI dependencies, and installable as a **PWA**.
 - ☑️ **Multi-select** — select several notes and archive, trash, delete or re-color them in one action
 - 🔀 **Drag to reorder** — arrange your notes your way
 - ✨ **Templates** — seven ready-made layouts: grocery, to-do, meeting, standup, project brief, research, journal
+- 🅱️ **Rich text** — bold, italic, underline, strike, code, highlights, links, headings, quotes and lists in every note
+- 🖼️ **Background library** — free professional, paper and midnight scenes plus premium studio backgrounds
+- 👑 **Premium plans** — small monthly or yearly subscription, local demo mode, and cloud-synced entitlement
 - 🤖 **AI note assistant** — summarize, rewrite, proofread, title, labels, tasks, organize, brainstorm, or ask anything
 - 🧠 **Offline AI fallback** — deterministic smart actions still work with no key or deployed function
 - 🔑 **Bring-your-own Gemini key** — optional key stored locally in the browser
@@ -43,6 +46,36 @@ npm run build        # production build to dist/keep-note
 npm test             # unit tests
 ```
 
+## Rich text formatting
+
+The editor has a formatting toolbar with `B`, `I`, `U`, strikethrough, inline code, highlight,
+links, headings, quotes, bullet/numbered lists and dividers. `Ctrl/Cmd + B/I/U` work while editing,
+and the **Preview** toggle renders the note using the same Markdown-like tokens used by the toolbar.
+Rendering escapes HTML first, so pasted markup is never executed. Notes remain plain text, which
+means existing notes, JSON backups and Markdown exports keep working unchanged.
+
+## Premium & backgrounds
+
+Use the **PRO** button in the header, the Data menu, or `Ctrl/Cmd + K` to open premium plans and the
+background picker. Monthly ($3) and yearly ($24) plans are handled by `netlify/functions/checkout.mjs`.
+On Netlify, set:
+
+```bash
+STRIPE_SECRET_KEY=sk_...
+STRIPE_PRICE_MONTHLY=price_...
+STRIPE_PRICE_YEARLY=price_...
+```
+
+Stripe Checkout redirects back to the app with its session id; the function verifies the session and
+returns the entitlement, which is stored in `localStorage` and synced in `users/{uid}/data/main`
+when signed in. The existing owner-only Firestore rules already cover that field. If Stripe is not
+configured, **Try demo** unlocks every background locally without taking a payment.
+
+Premium scenes are original animated assets in `public/` (`bg-fizz.svg`, `bg-peak.svg`,
+`bg-aurora.svg`, `bg-marble.svg`). `bg-fizz.svg` is an abstract glossy 3D soda-bar-style scene and
+`bg-peak.svg` is an alpine dairy-studio pour animation, video-like but lightweight. Neither uses
+third-party logos, product packaging or copied advertising assets.
+
 ## AI assistant
 
 The note editor includes an AI menu with summarize, continue, improve, proofread, shorten, title,
@@ -54,12 +87,18 @@ AI requests go through `netlify/functions/ai.mjs`. On Netlify, set:
 ```bash
 GEMINI_API_KEY=your-gemini-api-key
 GEMINI_MODEL=gemini-2.0-flash
+FIREBASE_WEB_API_KEY=your-firebase-web-api-key
 ```
 
-You can also paste a key into **Data → AI settings** (or open the command palette and choose
-**AI settings**). That key is saved only in `localStorage` and is sent to the AI function for each
-request; it is not written to the repository. Without a deployed function or configured key, the
-app automatically falls back to offline smart actions so the AI menu still works locally.
+`FIREBASE_WEB_API_KEY` is the public web API key from `src/environments/environment.ts`; the
+function uses it to verify each signed-in user's Firebase ID token against Firebase Auth. The
+server `GEMINI_API_KEY` is only used for verified signed-in users. Signed-out users can still use
+live AI by pasting a key into **Data → AI settings** (or the command palette's **AI settings**);
+that key is saved only in `localStorage` and sent to the function per request. It is never written
+to the repository.
+
+Without a signed-in session, a personal key, or a deployed function, the app automatically falls
+back to offline smart actions so the AI menu still works locally.
 
 ## Enabling cloud sync (Firebase)
 
@@ -89,7 +128,7 @@ app automatically falls back to offline smart actions so the AI menu still works
 7. **Authentication → Settings → Authorized domains** — add every host you deploy to (for example your Netlify domain) so sign-in works in production.
 8. Rebuild/restart — the account button turns into a live sync menu.
 
-Sync works over a per-user doc (`users/{uid}/data/main`), merges by last-write-wins per note, supports offline-first via Firestore's local cache, and degrades gracefully to local-only mode when no config is present.
+Sync works over a per-user doc (`users/{uid}/data/main`), merges by last-write-wins per note, carries the premium entitlement flag, supports offline-first via Firestore's local cache, and degrades gracefully to local-only mode when no config is present.
 
 > 🔐 The Firebase web config in `src/environments/environment.ts` is public by design; security comes from Firestore rules and authorized domains, not from hiding the `apiKey`. Keep the rules deployed and review them whenever the sync data shape changes.
 
@@ -129,15 +168,17 @@ src/
 │   │   ├── note-creator/     # "take a note…" composer + templates
 │   │   ├── note-card/        # single note in the masonry grid (checklist, drag, select)
 │   │   ├── notes-view/       # masonry grid, batch bar, empty states
-│   │   ├── note-dialog/      # editor: AI, checklist, reminders, labels, focus mode
+│   │   ├── note-dialog/      # editor: rich text, AI, checklist, reminders, labels, focus mode
 │   │   ├── command-palette/  # Ctrl/Cmd+K quick actions
 │   │   ├── ai-settings-dialog/# optional browser-local Gemini key
 │   │   ├── auth-dialog/      # sign in / create account / Google + sync status
+│   │   ├── premium-dialog/   # plans, demo mode and background picker
 │   │   └── ad-slot/          # placeholder advertising space (sidebar box + leaderboard)
 │   ├── environments/         # Firebase config (fill in your keys here)
-│   ├── models/               # Note, checklist parsing, colors, templates
-│   ├── services/             # state, localStorage, theme, sync, AI (Gemini + offline)
-│   └── app.component.*       # app shell, shortcuts, reminder timer
+│   ├── models/               # Note, note formatting, premium plans, checklist parsing, colors, templates
+│   ├── services/             # state, localStorage, theme, sync, premium, AI (Gemini + offline)
+│   ├── shared/pipes/         # safe rich-text renderer
+│   └── app.component.*       # app shell, shortcuts, ambient FX, reminder timer
 ├── index.html
 └── main.ts
 ```

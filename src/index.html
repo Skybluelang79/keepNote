@@ -15,8 +15,27 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="preload" as="image" href="bg-professional.jpg">
   <style>
-    :root {
+    :root,
+    html[data-background='professional'] {
       --app-bg-image: url('bg-professional.jpg');
+    }
+    html[data-background='soft-paper'] {
+      --app-bg-image: linear-gradient(135deg, #fbf7ef, #e9e0cf 55%, #d8ccb8);
+    }
+    html[data-background='midnight'] {
+      --app-bg-image: linear-gradient(135deg, #0b1020, #243252 58%, #4b3a72);
+    }
+    html[data-background='fizz'] {
+      --app-bg-image: url('bg-fizz.svg');
+    }
+    html[data-background='peak-cream'] {
+      --app-bg-image: url('bg-peak.svg');
+    }
+    html[data-background='aurora'] {
+      --app-bg-image: url('bg-aurora.svg');
+    }
+    html[data-background='marble'] {
+      --app-bg-image: url('bg-marble.svg');
     }
   </style>
 </head>

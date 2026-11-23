@@ -9,6 +9,7 @@ import { AdSlot } from './components/ad-slot/ad-slot.component';
 import { AuthDialog } from './components/auth-dialog/auth-dialog.component';
 import { CommandPalette } from './components/command-palette/command-palette.component';
 import { AiSettingsDialog } from './components/ai-settings-dialog/ai-settings-dialog.component';
+import { PremiumDialog } from './components/premium-dialog/premium-dialog.component';
 import { NotesService } from './services/note.service';
 
 @Component({
@@ -25,10 +26,19 @@ import { NotesService } from './services/note.service';
     AuthDialog,
     CommandPalette,
     AiSettingsDialog,
+    PremiumDialog,
   ],
   styleUrls: ['./app.component.css'],
   template: `
     <div class="app">
+      <div class="ambient-fx" aria-hidden="true">
+        <span class="orb orb-one"></span>
+        <span class="orb orb-two"></span>
+        <span class="bubble bubble-one"></span>
+        <span class="bubble bubble-two"></span>
+        <span class="bubble bubble-three"></span>
+      </div>
+
       <app-header
         [query]="notes.query()"
         (queryChange)="notes.setQuery($event)"
@@ -51,6 +61,7 @@ import { NotesService } from './services/note.service';
       <app-auth-dialog />
       <command-palette />
       <ai-settings-dialog />
+      <premium-dialog />
 
       @if (toast(); as t) {
         <div class="toast" role="status">

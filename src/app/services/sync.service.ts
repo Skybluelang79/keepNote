@@ -23,7 +23,9 @@ import {
   setDoc,
 } from 'firebase/firestore';
 import { Note } from '../models/note.model';
+import { PremiumState } from '../models/premium.model';
 import { NotesService, isSeededOnly } from './note.service';
+import { PremiumService } from './premium.service';
 import { environment } from '../../environments/environment';
 
 export type SyncStatus = 'off' | 'signed-out' | 'syncing' | 'synced' | 'error';
@@ -31,6 +33,7 @@ export type SyncStatus = 'off' | 'signed-out' | 'syncing' | 'synced' | 'error';
 interface CloudData {
   notes?: Note[];
   labels?: string[];
+  premium?: PremiumState | null;
   updatedAt?: number;
 }
 
@@ -52,6 +55,7 @@ export class SyncService {
   private lastPushed = '';
   private pushTimer: ReturnType<typeof setTimeout> | null = null;
   private readonly notesService = inject(NotesService);
+  private readonly premium = inject(PremiumService);
   private readonly zone = inject(NgZone);
 
   constructor() {
@@ -85,6 +89,7 @@ export class SyncService {
     effect(() => {
       void this.notesService.notes();
       void this.notesService.labels();
+      void this.premium.state();
       this.schedulePush();
     });
   }
@@ -98,6 +103,16 @@ export class SyncService {
         typeof f.projectId === 'string' &&
         f.projectId !== 'your-project',
     );
+  }
+
+  async getIdToken(): Promise<string | null> {
+    const user = this.user();
+    if (!user) return null;
+    try {
+      return await user.getIdToken();
+    } catch {
+      return null;
+    }
   }
 
   // --- Auth actions ---
@@ -186,6 +201,7 @@ export class SyncService {
   private adoptCloud(remote: CloudData | null): void {
     const local = this.notesService.notes();
     const localLabels = this.notesService.labels();
+    this.premium.adoptCloud(remote?.premium);
 
     if (!remote || !Array.isArray(remote.notes)) {
       // First sync: upload local data to the cloud.
@@ -216,6 +232,7 @@ export class SyncService {
   }
 
   private onRemote(remote: CloudData | null): void {
+    this.premium.adoptCloud(remote?.premium);
     if (!remote || !Array.isArray(remote.notes)) return;
     const payload = cloudPayload(remote);
     if (payload === this.lastPushed) return; // our own echo
@@ -237,7 +254,12 @@ export class SyncService {
     const user = this.user();
     const db = this.db;
     if (!user || !db) return;
-    const payload = { notes: this.notesService.notes(), labels: this.notesService.labels(), updatedAt: Date.now() };
+    const payload = {
+      notes: this.notesService.notes(),
+      labels: this.notesService.labels(),
+      premium: this.premium.state(),
+      updatedAt: Date.now(),
+    };
     if (cloudPayload(payload) === this.lastPushed) return;
     this.lastPushed = cloudPayload(payload);
     setDoc(doc(db, 'users', user.uid, 'data', 'main'), payload).catch(() => {
@@ -255,7 +277,7 @@ function cloudPayload(cloud: CloudData | null): string {
   if (!cloud) return '';
   const notes = Array.isArray(cloud.notes) ? cloud.notes : [];
   const labels = cloud.labels ?? [];
-  return canonical(['labels', labels, 'notes', notes]);
+  return canonical(['labels', labels, 'notes', notes, 'premium', cloud.premium ?? null]);
 }
 
 function canonical(value: unknown): string {

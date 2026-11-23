@@ -1,10 +1,20 @@
-const CACHE = 'keepnote-v5';
+const CACHE = 'keepnote-v7';
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches
       .open(CACHE)
-      .then((cache) => cache.addAll(['./', './index.html', './bg-professional.jpg']))
+      .then((cache) =>
+        cache.addAll([
+          './',
+          './index.html',
+          './bg-professional.jpg',
+          './bg-fizz.svg',
+          './bg-peak.svg',
+          './bg-aurora.svg',
+          './bg-marble.svg',
+        ]),
+      )
       .then(() => self.skipWaiting()),
   );
 });

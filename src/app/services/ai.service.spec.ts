@@ -78,4 +78,50 @@ describe('AiService', () => {
     const init = fetchSpy.calls.mostRecent().args[1] as RequestInit;
     expect((init.headers as Record<string, string>)['x-gemini-api-key']).toBe('test-key');
   });
+
+  it('sends the Firebase ID token without leaking it into the request body', async () => {
+    const fetchSpy = spyOn(window, 'fetch').and.resolveTo(
+      new Response(JSON.stringify({ text: 'Generated' }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      }),
+    );
+
+    const result = await service.generate({
+      action: 'summarize',
+      title: 'Launch notes',
+      content: 'We shipped the beta.',
+      authToken: 'firebase-id-token',
+    });
+
+    expect(result).toBe('Generated');
+    const init = fetchSpy.calls.mostRecent().args[1] as RequestInit;
+    expect((init.headers as Record<string, string>)['Authorization']).toBe(
+      'Bearer firebase-id-token',
+    );
+    expect(JSON.parse(String(init.body)).authToken).toBeUndefined();
+  });
+
+  it('uses the offline fallback when live AI access is denied', async () => {
+    const response = new Response(
+      JSON.stringify({
+        error: 'AI_AUTH_REQUIRED',
+        message: 'Sign in to KeepNote or add your own Gemini key in AI settings.',
+      }),
+      {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' },
+      },
+    );
+    spyOn(window, 'fetch').and.resolveTo(response);
+
+    const result = await service.generate({
+      action: 'summarize',
+      title: 'Launch notes',
+      content: 'We shipped the beta.',
+    });
+
+    expect(result).toContain('We shipped the beta.');
+    expect(service.lastUsedOffline()).toBeTrue();
+  });
 });

@@ -41,6 +41,9 @@ export class ShortcutsDialog {
     { keys: ['/', 'F'], desc: 'Search your notes' },
     { keys: ['Ctrl', 'K'], desc: 'Open the command palette' },
     { keys: ['Alt', 'F'], desc: 'Toggle focus mode in an open note' },
+    { keys: ['Ctrl', 'B'], desc: 'Bold selected text while editing' },
+    { keys: ['Ctrl', 'I'], desc: 'Italicize selected text while editing' },
+    { keys: ['Ctrl', 'U'], desc: 'Underline selected text while editing' },
     { keys: ['Esc'], desc: 'Close dialog / exit selection' },
     { keys: ['?', 'Alt + /'], desc: 'Show this help' },
   ];
