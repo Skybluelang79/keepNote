@@ -37,6 +37,13 @@ export class PremiumService {
     const state = this.state();
     return state.active && (state.expiresAt === null || state.expiresAt > Date.now());
   });
+  readonly isPaid = computed(() => {
+    const state = this.state();
+    return (
+      this.isPremium() && (state.source === 'stripe' || state.source === 'cloud')
+    );
+  });
+  readonly showAds = computed(() => !this.isPaid());
   readonly settingsOpen = signal(false);
   readonly tab = signal<'plans' | 'backgrounds' | 'features'>('plans');
   readonly features = computed<PremiumFeature[]>(() => {

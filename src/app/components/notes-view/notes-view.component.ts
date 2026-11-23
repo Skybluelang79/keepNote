@@ -223,7 +223,7 @@ import { wordCount } from '../../models/note.model';
         }
       }
 
-      @if (notes.view() === 'notes' && !premium.hasFeature('ad-free')) {
+      @if (premium.showAds()) {
         <app-ad-slot variant="leaderboard" class="promo-ad" />
       }
 

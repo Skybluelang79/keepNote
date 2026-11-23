@@ -81,7 +81,7 @@ import { PremiumService } from '../../services/premium.service';
       </div>
 
       <footer class="sidebar-foot">
-        @if (!premium.hasFeature('ad-free')) {
+        @if (premium.showAds()) {
           <app-ad-slot variant="box" />
         }
         <span class="foot-note">KeepNote · Local-first</span>

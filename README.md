@@ -86,9 +86,10 @@ dairy-studio pour animation, video-like but lightweight. The navy, violet, green
 are original motion pieces inspired by free animated background styles. None of the assets use
 third-party logos, product packaging or copied advertising footage.
 
-The sidebar box and the leaderboard under the notes header are live ad slots. They rotate original
-animated creatives built from the bundled premium scenes; clicking a creative applies its background
-for premium users or opens the plans dialog for everyone else.
+The sidebar box and the leaderboard above the notes grid are live ad slots for every free and demo
+user, across notes, archive and trash. They rotate original unbranded 3D-style creatives built from
+the bundled premium scenes; clicking a creative applies its background for premium users or opens
+the plans dialog for everyone else. Paid subscriptions hide the ads.
 
 ## AI assistant
 

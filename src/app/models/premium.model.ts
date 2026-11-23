@@ -30,7 +30,7 @@ export const PREMIUM_FEATURES: PremiumFeatureOption[] = [
   {
     id: 'ad-free',
     name: 'Ad-free workspace',
-    description: 'Hide the promotional ad slot across the notes grid and sidebar.',
+    description: 'Hide the promotional ad slots across notes, archive, trash and the sidebar.',
     badge: 'Both plans',
   },
   {
