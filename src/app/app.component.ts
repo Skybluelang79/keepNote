@@ -5,7 +5,6 @@ import { NotesView } from './components/notes-view/notes-view.component';
 import { NoteDialog } from './components/note-dialog/note-dialog.component';
 import { ShortcutsDialog } from './components/app-shortcuts/app-shortcuts.component';
 import { AppIcon } from './components/app-icon/app-icon.component';
-import { AdSlot } from './components/ad-slot/ad-slot.component';
 import { AuthDialog } from './components/auth-dialog/auth-dialog.component';
 import { CommandPalette } from './components/command-palette/command-palette.component';
 import { AiSettingsDialog } from './components/ai-settings-dialog/ai-settings-dialog.component';
@@ -22,7 +21,6 @@ import { NotesService } from './services/note.service';
     NoteDialog,
     ShortcutsDialog,
     AppIcon,
-    AdSlot,
     AuthDialog,
     CommandPalette,
     AiSettingsDialog,
@@ -52,7 +50,6 @@ import { NotesService } from './services/note.service';
         </div>
         <main class="main">
           <notes-view />
-          <app-ad-slot variant="leaderboard" class="ad-leaderboard" />
         </main>
       </div>
 

@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="nebula-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#030715"/>
+      <stop offset="0.5" stop-color="#081b3d"/>
+      <stop offset="1" stop-color="#102f63"/>
+    </linearGradient>
+    <radialGradient id="nebula-blue" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#8fd8ff" stop-opacity="0.85"/>
+      <stop offset="0.42" stop-color="#3b82f6" stop-opacity="0.42"/>
+      <stop offset="1" stop-color="#03102a" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="nebula-violet" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#d6b4ff" stop-opacity="0.62"/>
+      <stop offset="1" stop-color="#4c1d95" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="nebula-ribbon" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#1e3a8a" stop-opacity="0"/>
+      <stop offset="0.3" stop-color="#60a5fa" stop-opacity="0.8"/>
+      <stop offset="0.66" stop-color="#a78bfa" stop-opacity="0.65"/>
+      <stop offset="1" stop-color="#22d3ee" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="nebula-blur" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="42"/>
+    </filter>
+  </defs>
+
+  <rect width="1600" height="1000" fill="url(#nebula-bg)"/>
+  <ellipse cx="1180" cy="280" rx="520" ry="390" fill="url(#nebula-blue)" filter="url(#nebula-blur)">
+    <animate attributeName="cx" values="1180;1080;1180" dur="18s" repeatCount="indefinite"/>
+  </ellipse>
+  <ellipse cx="360" cy="760" rx="460" ry="320" fill="url(#nebula-violet)" filter="url(#nebula-blur)">
+    <animate attributeName="cy" values="760;680;760" dur="22s" repeatCount="indefinite"/>
+  </ellipse>
+
+  <path d="M-200 720 C 280 420, 560 980, 960 610 S 1480 240, 1800 470"
+        stroke="url(#nebula-ribbon)" stroke-width="150" fill="none" filter="url(#nebula-blur)" opacity="0.72">
+    <animate attributeName="d"
+      values="M-200 720 C 280 420, 560 980, 960 610 S 1480 240, 1800 470;
+              M-200 690 C 300 390, 600 940, 990 580 S 1500 210, 1800 440;
+              M-200 720 C 280 420, 560 980, 960 610 S 1480 240, 1800 470"
+      dur="14s" repeatCount="indefinite"/>
+  </path>
+  <path d="M-180 700 C 300 400, 580 950, 970 590 S 1490 220, 1800 450"
+        stroke="url(#nebula-ribbon)" stroke-width="12" fill="none" opacity="0.62"/>
+
+  <g fill="#ffffff">
+    <circle cx="220" cy="180" r="3" opacity="0.7"><animate attributeName="opacity" values="0.7;0.15;0.7" dur="4s" repeatCount="indefinite"/></circle>
+    <circle cx="430" cy="320" r="2" opacity="0.5"><animate attributeName="opacity" values="0.5;0.9;0.5" dur="6s" repeatCount="indefinite"/></circle>
+    <circle cx="690" cy="140" r="4" opacity="0.6"><animate attributeName="opacity" values="0.6;0.2;0.6" dur="5s" repeatCount="indefinite"/></circle>
+    <circle cx="940" cy="280" r="2.5" opacity="0.8"><animate attributeName="opacity" values="0.8;0.25;0.8" dur="7s" repeatCount="indefinite"/></circle>
+    <circle cx="1260" cy="160" r="3" opacity="0.5"><animate attributeName="opacity" values="0.5;1;0.5" dur="5.5s" repeatCount="indefinite"/></circle>
+    <circle cx="1480" cy="420" r="2" opacity="0.7"><animate attributeName="opacity" values="0.7;0.2;0.7" dur="6.5s" repeatCount="indefinite"/></circle>
+    <circle cx="380" cy="620" r="2.5" opacity="0.6"><animate attributeName="opacity" values="0.6;0.95;0.6" dur="4.5s" repeatCount="indefinite"/></circle>
+    <circle cx="1120" cy="760" r="3" opacity="0.55"><animate attributeName="opacity" values="0.55;0.15;0.55" dur="7s" repeatCount="indefinite"/></circle>
+  </g>
+</svg>

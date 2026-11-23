@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { AppIcon } from '../app-icon/app-icon.component';
 import { AdSlot } from '../ad-slot/ad-slot.component';
 import { NotesService, View } from '../../services/note.service';
+import { PremiumService } from '../../services/premium.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -80,7 +81,9 @@ import { NotesService, View } from '../../services/note.service';
       </div>
 
       <footer class="sidebar-foot">
-        <app-ad-slot variant="box" />
+        @if (!premium.hasFeature('ad-free')) {
+          <app-ad-slot variant="box" />
+        }
         <span class="foot-note">KeepNote · Local-first</span>
       </footer>
     </aside>
@@ -88,6 +91,7 @@ import { NotesService, View } from '../../services/note.service';
 })
 export class AppSidebar {
   protected readonly notes = inject(NotesService);
+  protected readonly premium = inject(PremiumService);
   protected readonly editing = signal(false);
   protected newLabel = '';
 

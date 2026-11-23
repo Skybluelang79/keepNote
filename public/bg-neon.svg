@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="neon-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#02150f"/>
+      <stop offset="0.5" stop-color="#064e3b"/>
+      <stop offset="1" stop-color="#65a30d"/>
+    </linearGradient>
+    <radialGradient id="neon-glow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#d9f99d" stop-opacity="0.92"/>
+      <stop offset="0.42" stop-color="#84cc16" stop-opacity="0.48"/>
+      <stop offset="1" stop-color="#022c22" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="neon-line" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#22c55e" stop-opacity="0"/>
+      <stop offset="0.3" stop-color="#bef264" stop-opacity="0.92"/>
+      <stop offset="0.7" stop-color="#34d399" stop-opacity="0.72"/>
+      <stop offset="1" stop-color="#a3e635" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="neon-blur" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="46"/>
+    </filter>
+  </defs>
+
+  <rect width="1600" height="1000" fill="url(#neon-bg)"/>
+  <ellipse cx="1180" cy="260" rx="560" ry="400" fill="url(#neon-glow)" filter="url(#neon-blur)">
+    <animate attributeName="cx" values="1180;1080;1180" dur="18s" repeatCount="indefinite"/>
+  </ellipse>
+  <ellipse cx="320" cy="820" rx="480" ry="340" fill="url(#neon-glow)" filter="url(#neon-blur)" opacity="0.7">
+    <animate attributeName="cy" values="820;740;820" dur="22s" repeatCount="indefinite"/>
+  </ellipse>
+
+  <path d="M-200 360 C 220 120, 520 760, 900 440 S 1450 100, 1800 420"
+        stroke="url(#neon-line)" stroke-width="120" fill="none" filter="url(#neon-blur)" opacity="0.8">
+    <animate attributeName="d"
+      values="M-200 360 C 220 120, 520 760, 900 440 S 1450 100, 1800 420;
+              M-200 400 C 260 160, 560 800, 940 460 S 1490 140, 1800 400;
+              M-200 360 C 220 120, 520 760, 900 440 S 1450 100, 1800 420"
+      dur="13s" repeatCount="indefinite"/>
+  </path>
+  <path d="M-180 350 C 240 110, 540 750, 920 430 S 1470 90, 1800 410"
+        stroke="url(#neon-line)" stroke-width="10" fill="none" opacity="0.85"/>
+  <path d="M-160 690 C 260 460, 620 980, 980 620 S 1500 420, 1800 640"
+        stroke="url(#neon-line)" stroke-width="8" fill="none" opacity="0.5"/>
+
+  <g fill="#ecfccb">
+    <circle cx="220" cy="240" r="14"><animate attributeName="cy" values="240;180;240" dur="8s" repeatCount="indefinite"/></circle>
+    <circle cx="560" cy="620" r="9"><animate attributeName="cy" values="620;560;620" dur="6s" repeatCount="indefinite"/></circle>
+    <circle cx="980" cy="200" r="18"><animate attributeName="cy" values="200;140;200" dur="10s" repeatCount="indefinite"/></circle>
+    <circle cx="1360" cy="620" r="12"><animate attributeName="cy" values="620;560;620" dur="7s" repeatCount="indefinite"/></circle>
+  </g>
+</svg>

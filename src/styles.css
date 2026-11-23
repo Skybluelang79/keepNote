@@ -74,6 +74,38 @@
   color-scheme: dark;
 }
 
+html[data-accent='sunset'] {
+  --accent: #e2562f;
+  --accent-strong: #c84422;
+  --accent-soft: rgba(226, 86, 47, 0.14);
+  --accent-contrast: #ffffff;
+  --shadow-accent: 0 8px 20px -6px rgba(226, 86, 47, 0.5);
+}
+
+html[data-accent='ocean'] {
+  --accent: #0284c7;
+  --accent-strong: #0369a1;
+  --accent-soft: rgba(2, 132, 199, 0.14);
+  --accent-contrast: #ffffff;
+  --shadow-accent: 0 8px 20px -6px rgba(2, 132, 199, 0.5);
+}
+
+html[data-accent='forest'] {
+  --accent: #15803d;
+  --accent-strong: #166534;
+  --accent-soft: rgba(21, 128, 61, 0.14);
+  --accent-contrast: #ffffff;
+  --shadow-accent: 0 8px 20px -6px rgba(21, 128, 61, 0.5);
+}
+
+html[data-accent='rose'] {
+  --accent: #be123c;
+  --accent-strong: #9f1239;
+  --accent-soft: rgba(190, 18, 60, 0.14);
+  --accent-contrast: #ffffff;
+  --shadow-accent: 0 8px 20px -6px rgba(190, 18, 60, 0.5);
+}
+
 /* --- Reset --- */
 * {
   box-sizing: border-box;
@@ -154,6 +186,38 @@ html[data-background='marble'] {
 
 html[data-theme='light'][data-background='marble'] {
   --bg-wash: linear-gradient(180deg, rgba(250, 251, 252, 0.7), rgba(246, 248, 250, 0.64));
+}
+
+html[data-background='nebula'] {
+  --bg-wash: linear-gradient(180deg, rgba(4, 9, 24, 0.76), rgba(6, 18, 42, 0.82));
+}
+
+html[data-theme='light'][data-background='nebula'] {
+  --bg-wash: linear-gradient(180deg, rgba(238, 246, 255, 0.72), rgba(244, 248, 255, 0.64));
+}
+
+html[data-background='violet'] {
+  --bg-wash: linear-gradient(180deg, rgba(22, 5, 47, 0.76), rgba(48, 12, 78, 0.8));
+}
+
+html[data-theme='light'][data-background='violet'] {
+  --bg-wash: linear-gradient(180deg, rgba(250, 242, 255, 0.72), rgba(252, 246, 255, 0.64));
+}
+
+html[data-background='neon'] {
+  --bg-wash: linear-gradient(180deg, rgba(2, 21, 15, 0.76), rgba(6, 45, 34, 0.8));
+}
+
+html[data-theme='light'][data-background='neon'] {
+  --bg-wash: linear-gradient(180deg, rgba(242, 255, 246, 0.72), rgba(246, 255, 242, 0.64));
+}
+
+html[data-background='amber'] {
+  --bg-wash: linear-gradient(180deg, rgba(28, 10, 4, 0.76), rgba(80, 28, 8, 0.8));
+}
+
+html[data-theme='light'][data-background='amber'] {
+  --bg-wash: linear-gradient(180deg, rgba(255, 247, 237, 0.72), rgba(255, 250, 240, 0.64));
 }
 
 .rich-text p {

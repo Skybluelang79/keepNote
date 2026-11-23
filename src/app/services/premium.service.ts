@@ -9,8 +9,11 @@ import {
 } from '@angular/core';
 import {
   FREE_PREMIUM_STATE,
+  PLAN_FEATURES,
+  PremiumFeature,
   PremiumPlan,
   PremiumState,
+  hasPremiumFeature,
   isPremiumPlan,
 } from '../models/premium.model';
 
@@ -23,6 +26,8 @@ interface CheckoutResponse {
   plan?: PremiumPlan;
   expiresAt?: number | null;
   sessionId?: string;
+  customer?: string | null;
+  subscription?: string | null;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -33,7 +38,11 @@ export class PremiumService {
     return state.active && (state.expiresAt === null || state.expiresAt > Date.now());
   });
   readonly settingsOpen = signal(false);
-  readonly tab = signal<'plans' | 'backgrounds'>('plans');
+  readonly tab = signal<'plans' | 'backgrounds' | 'features'>('plans');
+  readonly features = computed<PremiumFeature[]>(() => {
+    const plan = this.state().plan;
+    return plan ? PLAN_FEATURES[plan] : [];
+  });
   readonly busy = signal(false);
   readonly error = signal('');
   readonly notice = signal('');
@@ -63,7 +72,11 @@ export class PremiumService {
     }
   }
 
-  open(tab: 'plans' | 'backgrounds' = 'plans'): void {
+  hasFeature(feature: PremiumFeature): boolean {
+    return hasPremiumFeature(this.state(), feature);
+  }
+
+  open(tab: 'plans' | 'backgrounds' | 'features' = 'plans'): void {
     this.tab.set(tab);
     this.error.set('');
     this.settingsOpen.set(true);
@@ -154,6 +167,8 @@ export class PremiumService {
         activatedAt: Date.now(),
         expiresAt: data.expiresAt ?? null,
         checkoutSessionId: sessionId,
+        customerId: data.customer ?? null,
+        subscriptionId: data.subscription ?? null,
       });
       this.notice.set('Premium is active. Thank you for supporting KeepNote!');
       this.persist();
@@ -165,6 +180,32 @@ export class PremiumService {
       );
       this.cleanUrl();
       this.open('plans');
+    } finally {
+      this.busy.set(false);
+    }
+  }
+
+  async manageSubscription(): Promise<void> {
+    const customerId = this.state().customerId;
+    if (!customerId) {
+      this.error.set('Billing management is available after a Stripe checkout.');
+      return;
+    }
+    this.busy.set(true);
+    this.error.set('');
+    try {
+      const response = await fetch('/api/portal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ customerId, returnUrl: window.location.origin + window.location.pathname }),
+      });
+      const data = (await response.json().catch(() => ({}))) as CheckoutResponse;
+      if (!response.ok || !data.url) {
+        throw new Error(data.error ?? 'Stripe billing portal is not available yet.');
+      }
+      window.location.href = data.url;
+    } catch (error) {
+      this.error.set(error instanceof Error ? error.message : 'Could not open billing settings.');
     } finally {
       this.busy.set(false);
     }
@@ -206,5 +247,7 @@ function normalize(value: Partial<PremiumState>): PremiumState {
     activatedAt: typeof value.activatedAt === 'number' ? value.activatedAt : null,
     expiresAt: typeof value.expiresAt === 'number' ? value.expiresAt : null,
     checkoutSessionId: typeof value.checkoutSessionId === 'string' ? value.checkoutSessionId : null,
+    customerId: typeof value.customerId === 'string' ? value.customerId : null,
+    subscriptionId: typeof value.subscriptionId === 'string' ? value.subscriptionId : null,
   };
 }

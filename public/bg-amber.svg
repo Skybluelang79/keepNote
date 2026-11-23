@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="amber-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1c0a04"/>
+      <stop offset="0.5" stop-color="#9a3412"/>
+      <stop offset="1" stop-color="#fbbf24"/>
+    </linearGradient>
+    <radialGradient id="amber-sun" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#fff7c2" stop-opacity="0.95"/>
+      <stop offset="0.38" stop-color="#fb923c" stop-opacity="0.58"/>
+      <stop offset="1" stop-color="#7c2d12" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="amber-wave" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#7c2d12" stop-opacity="0"/>
+      <stop offset="0.32" stop-color="#fdba74" stop-opacity="0.8"/>
+      <stop offset="0.68" stop-color="#f59e0b" stop-opacity="0.7"/>
+      <stop offset="1" stop-color="#451a03" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="amber-blur" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="44"/>
+    </filter>
+  </defs>
+
+  <rect width="1600" height="1000" fill="url(#amber-bg)"/>
+  <ellipse cx="1220" cy="260" rx="540" ry="400" fill="url(#amber-sun)" filter="url(#amber-blur)">
+    <animate attributeName="rx" values="520;580;520" dur="16s" repeatCount="indefinite"/>
+  </ellipse>
+  <ellipse cx="280" cy="820" rx="460" ry="320" fill="url(#amber-sun)" filter="url(#amber-blur)" opacity="0.55">
+    <animate attributeName="cy" values="820;760;820" dur="20s" repeatCount="indefinite"/>
+  </ellipse>
+
+  <path d="M-200 700 C 260 460, 560 940, 960 620 S 1480 300, 1800 520"
+        stroke="url(#amber-wave)" stroke-width="150" fill="none" filter="url(#amber-blur)" opacity="0.78">
+    <animate attributeName="d"
+      values="M-200 700 C 260 460, 560 940, 960 620 S 1480 300, 1800 520;
+              M-200 730 C 300 490, 600 970, 1000 650 S 1520 330, 1800 500;
+              M-200 700 C 260 460, 560 940, 960 620 S 1480 300, 1800 520"
+      dur="15s" repeatCount="indefinite"/>
+  </path>
+  <path d="M-180 690 C 280 450, 580 930, 980 610 S 1500 290, 1800 510"
+        stroke="url(#amber-wave)" stroke-width="10" fill="none" opacity="0.62"/>
+
+  <g fill="#fff7ed" opacity="0.7">
+    <circle cx="180" cy="220" r="16"><animate attributeName="cy" values="220;160;220" dur="9s" repeatCount="indefinite"/></circle>
+    <circle cx="520" cy="340" r="10"><animate attributeName="cy" values="340;280;340" dur="7s" repeatCount="indefinite"/></circle>
+    <circle cx="900" cy="180" r="14"><animate attributeName="cy" values="180;120;180" dur="11s" repeatCount="indefinite"/></circle>
+    <circle cx="1320" cy="420" r="12"><animate attributeName="cy" values="420;360;420" dur="8s" repeatCount="indefinite"/></circle>
+    <circle cx="1480" cy="760" r="18"><animate attributeName="cy" values="760;700;760" dur="10s" repeatCount="indefinite"/></circle>
+  </g>
+</svg>

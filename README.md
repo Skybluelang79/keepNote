@@ -20,7 +20,9 @@ Built with **Angular 20**, zero UI dependencies, and installable as a **PWA**.
 - ✨ **Templates** — seven ready-made layouts: grocery, to-do, meeting, standup, project brief, research, journal
 - 🅱️ **Rich text** — bold, italic, underline, strike, code, highlights, links, headings, quotes and lists in every note
 - 🖼️ **Background library** — free professional, paper and midnight scenes plus premium studio backgrounds
-- 👑 **Premium plans** — small monthly or yearly subscription, local demo mode, and cloud-synced entitlement
+- 🎨 **Accent themes** — premium-only palettes for buttons, highlights and focus states
+- 📢 **Animated ad space** — original 3D-style Fizz Studio and Peak Cream creatives plus rotating premium previews in the sidebar and leaderboard; hidden for premium subscribers
+- 👑 **Premium plans** — monthly/yearly subscriptions, note version history on yearly, local demo mode, Stripe billing management, and cloud-synced entitlement
 - 🤖 **AI note assistant** — summarize, rewrite, proofread, title, labels, tasks, organize, brainstorm, or ask anything
 - 🧠 **Offline AI fallback** — deterministic smart actions still work with no key or deployed function
 - 🔑 **Bring-your-own Gemini key** — optional key stored locally in the browser
@@ -56,25 +58,37 @@ means existing notes, JSON backups and Markdown exports keep working unchanged.
 
 ## Premium & backgrounds
 
-Use the **PRO** button in the header, the Data menu, or `Ctrl/Cmd + K` to open premium plans and the
-background picker. Monthly ($3) and yearly ($24) plans are handled by `netlify/functions/checkout.mjs`.
-On Netlify, set:
+Use the **PRO** button in the header, the Data menu, or `Ctrl/Cmd + K` to open premium plans,
+background picker and feature list. Monthly ($3) and yearly ($24) plans are handled by
+`netlify/functions/checkout.mjs`; billing management uses `netlify/functions/portal.mjs`. On Netlify,
+set:
 
 ```bash
 STRIPE_SECRET_KEY=sk_...
 STRIPE_PRICE_MONTHLY=price_...
 STRIPE_PRICE_YEARLY=price_...
+STRIPE_CUSTOMER_PORTAL_RETURN_URL=https://your-site.netlify.app/
 ```
 
-Stripe Checkout redirects back to the app with its session id; the function verifies the session and
-returns the entitlement, which is stored in `localStorage` and synced in `users/{uid}/data/main`
-when signed in. The existing owner-only Firestore rules already cover that field. If Stripe is not
-configured, **Try demo** unlocks every background locally without taking a payment.
+Both paid plans unlock the premium background library, accent themes and an ad-free workspace.
+Yearly also unlocks note version history; the editor shows a **Version history** button with the last
+12 saved versions and can restore one with a click. Stripe Checkout redirects back to the app with
+its session id; the function verifies the session and returns the plan, entitlement, Stripe customer
+and subscription ids. That state is stored in `localStorage` and synced in `users/{uid}/data/main`
+when signed in. The existing owner-only Firestore rules already cover that field. **Manage billing**
+opens the Stripe Customer Portal after a real checkout. If Stripe is not configured, **Try demo**
+unlocks all premium features locally without taking a payment.
 
 Premium scenes are original animated assets in `public/` (`bg-fizz.svg`, `bg-peak.svg`,
-`bg-aurora.svg`, `bg-marble.svg`). `bg-fizz.svg` is an abstract glossy 3D soda-bar-style scene and
-`bg-peak.svg` is an alpine dairy-studio pour animation, video-like but lightweight. Neither uses
-third-party logos, product packaging or copied advertising assets.
+`bg-aurora.svg`, `bg-marble.svg`, `bg-nebula.svg`, `bg-violet.svg`, `bg-neon.svg`, `bg-amber.svg`).
+`bg-fizz.svg` is an abstract glossy 3D soda-bar-style scene and `bg-peak.svg` is an alpine
+dairy-studio pour animation, video-like but lightweight. The navy, violet, green and amber scenes
+are original motion pieces inspired by free animated background styles. None of the assets use
+third-party logos, product packaging or copied advertising footage.
+
+The sidebar box and the leaderboard under the notes header are live ad slots. They rotate original
+animated creatives built from the bundled premium scenes; clicking a creative applies its background
+for premium users or opens the plans dialog for everyone else.
 
 ## AI assistant
 
@@ -157,7 +171,8 @@ URLs, so it works both at a domain root and under a sub-path like `/keepNote/`.
 ```
 firebase.json            # Firestore rules config
 firestore.rules          # owner-only sync rules
-netlify.toml             # build, publish, SPA + AI function redirects
+netlify.toml             # build, publish, SPA + function redirects
+netlify/functions/       # AI assistant, Stripe checkout, Stripe billing portal
 src/
 ├── app/
 │   ├── components/
@@ -168,12 +183,12 @@ src/
 │   │   ├── note-creator/     # "take a note…" composer + templates
 │   │   ├── note-card/        # single note in the masonry grid (checklist, drag, select)
 │   │   ├── notes-view/       # masonry grid, batch bar, empty states
-│   │   ├── note-dialog/      # editor: rich text, AI, checklist, reminders, labels, focus mode
+│   │   ├── note-dialog/      # editor: rich text, AI, checklist, reminders, labels, version history, focus mode
 │   │   ├── command-palette/  # Ctrl/Cmd+K quick actions
 │   │   ├── ai-settings-dialog/# optional browser-local Gemini key
 │   │   ├── auth-dialog/      # sign in / create account / Google + sync status
-│   │   ├── premium-dialog/   # plans, demo mode and background picker
-│   │   └── ad-slot/          # placeholder advertising space (sidebar box + leaderboard)
+│   │   ├── premium-dialog/   # plans, features, accents, billing management, demo mode and background picker
+│   │   └── ad-slot/          # rotating original animated ad creatives (sidebar box + leaderboard)
 │   ├── environments/         # Firebase config (fill in your keys here)
 │   ├── models/               # Note, note formatting, premium plans, checklist parsing, colors, templates
 │   ├── services/             # state, localStorage, theme, sync, premium, AI (Gemini + offline)

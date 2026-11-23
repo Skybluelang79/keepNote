@@ -2,14 +2,16 @@ import { Component, HostListener, computed, inject, signal } from '@angular/core
 import { NoteCreator } from '../note-creator/note-creator.component';
 import { NoteCard } from '../note-card/note-card.component';
 import { AppIcon, IconName } from '../app-icon/app-icon.component';
+import { AdSlot } from '../ad-slot/ad-slot.component';
 import { ColorPicker } from '../color-picker/color-picker.component';
 import { NotesService, SortMode, LayoutMode } from '../../services/note.service';
+import { PremiumService } from '../../services/premium.service';
 import { wordCount } from '../../models/note.model';
 
 @Component({
   selector: 'notes-view',
   standalone: true,
-  imports: [NoteCreator, NoteCard, AppIcon, ColorPicker],
+  imports: [NoteCreator, NoteCard, AppIcon, ColorPicker, AdSlot],
   styleUrls: ['./notes-view.component.css'],
   template: `
     <div class="view" [attr.data-view]="notes.view()">
@@ -221,6 +223,10 @@ import { wordCount } from '../../models/note.model';
         }
       }
 
+      @if (notes.view() === 'notes' && !premium.hasFeature('ad-free')) {
+        <app-ad-slot variant="leaderboard" class="promo-ad" />
+      }
+
       @if (viewTotal() === 0) {
         <div class="empty-state">
           <div class="empty-icon">
@@ -276,6 +282,7 @@ import { wordCount } from '../../models/note.model';
 })
 export class NotesView {
   protected readonly notes = inject(NotesService);
+  protected readonly premium = inject(PremiumService);
   protected readonly paletteOpen = signal(false);
   protected readonly sortOpen = signal(false);
 

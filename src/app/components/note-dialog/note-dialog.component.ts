@@ -13,6 +13,7 @@ import { ColorPicker } from '../color-picker/color-picker.component';
 import { NotesService } from '../../services/note.service';
 import { AiService, AiAction, AiOrganizeResult } from '../../services/ai.service';
 import { SyncService } from '../../services/sync.service';
+import { PremiumService } from '../../services/premium.service';
 import {
   Note,
   formatRelativeTime,
@@ -32,6 +33,7 @@ import { RichTextPipe } from '../../shared/pipes/rich-text.pipe';
   selector: 'note-dialog',
   standalone: true,
   imports: [AppIcon, ColorPicker, RichTextPipe],
+  styleUrls: ['./note-dialog.component.css'],
   template: `
     @if (note(); as current) {
       <div class="overlay" (click)="notes.closeNote()">
@@ -79,6 +81,35 @@ import { RichTextPipe } from '../../shared/pipes/rich-text.pipe';
               </button>
             }
           </div>
+
+          @if (premium.hasFeature('note-history')) {
+            <div class="history-bar">
+              <button
+                type="button"
+                class="history-toggle"
+                [class.active]="historyOpen()"
+                (click)="historyOpen.set(!historyOpen())"
+              >
+                <app-icon name="restore" />
+                <span>Version history</span>
+                <span class="history-count">{{ versions().length }}</span>
+              </button>
+              @if (historyOpen()) {
+                <div class="history-menu">
+                  @for (version of versions(); track version.id) {
+                    <button type="button" class="history-item" (click)="restoreVersion(version.id)">
+                      <strong>{{ version.note.title || 'Untitled note' }}</strong>
+                      <small>
+                        {{ relativeTimeFn(version.savedAt) }} · {{ wordCountFn(version.note.content) }} words
+                      </small>
+                    </button>
+                  } @empty {
+                    <span class="history-empty">No earlier versions yet — keep editing.</span>
+                  }
+                </div>
+              }
+            </div>
+          }
 
           @if (current.labels.length) {
             <div class="meta-block">
@@ -470,6 +501,7 @@ export class NoteDialog {
   protected readonly notes = inject(NotesService);
   protected readonly ai = inject(AiService);
   protected readonly sync = inject(SyncService);
+  protected readonly premium = inject(PremiumService);
   protected readonly paletteOpen = signal(false);
   protected readonly labelsOpen = signal(false);
   protected readonly reminderOpen = signal(false);
@@ -554,6 +586,11 @@ export class NoteDialog {
   });
 
   protected readonly note = this.notes.editingNote;
+  protected readonly historyOpen = signal(false);
+  protected readonly versions = computed(() => {
+    const id = this.note()?.id;
+    return id ? this.notes.noteVersions(id) : [];
+  });
   protected readonly formatReminderTimeFn = formatReminderTime;
   protected readonly wordCountFn = wordCount;
   protected readonly relativeTimeFn = formatRelativeTime;
@@ -565,6 +602,7 @@ export class NoteDialog {
         this.labelsOpen.set(false);
         this.reminderOpen.set(false);
         this.preview.set(false);
+        this.historyOpen.set(false);
         this.dismissAi();
       }
     });
@@ -579,6 +617,13 @@ export class NoteDialog {
   onTitle(el: HTMLTextAreaElement, note: Note): void {
     this.notes.updateNote(note.id, { title: el.value });
     this.autoGrow(el);
+  }
+
+  restoreVersion(versionId: string): void {
+    const note = this.note();
+    if (!note) return;
+    this.notes.restoreVersion(note.id, versionId);
+    this.historyOpen.set(false);
   }
 
   checklistItems(note: Note) {

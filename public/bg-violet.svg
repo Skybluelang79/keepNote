@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="violet-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#16052f"/>
+      <stop offset="0.48" stop-color="#4c1d95"/>
+      <stop offset="1" stop-color="#db2777"/>
+    </linearGradient>
+    <radialGradient id="violet-glow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#f5d0fe" stop-opacity="0.92"/>
+      <stop offset="0.4" stop-color="#c026d3" stop-opacity="0.5"/>
+      <stop offset="1" stop-color="#3b0764" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="violet-halo" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#a78bfa" stop-opacity="0.72"/>
+      <stop offset="1" stop-color="#6d28d9" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="violet-wave" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#7c3aed" stop-opacity="0"/>
+      <stop offset="0.35" stop-color="#f0abfc" stop-opacity="0.8"/>
+      <stop offset="0.7" stop-color="#a78bfa" stop-opacity="0.62"/>
+      <stop offset="1" stop-color="#ec4899" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="violet-blur" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="48"/>
+    </filter>
+  </defs>
+
+  <rect width="1600" height="1000" fill="url(#violet-bg)"/>
+  <ellipse cx="380" cy="260" rx="520" ry="400" fill="url(#violet-glow)" filter="url(#violet-blur)">
+    <animate attributeName="cx" values="380;500;380" dur="20s" repeatCount="indefinite"/>
+  </ellipse>
+  <ellipse cx="1240" cy="760" rx="520" ry="380" fill="url(#violet-halo)" filter="url(#violet-blur)">
+    <animate attributeName="cy" values="760;680;760" dur="16s" repeatCount="indefinite"/>
+  </ellipse>
+
+  <path d="M-220 260 C 220 620, 520 80, 900 440 S 1440 840, 1800 520"
+        stroke="url(#violet-wave)" stroke-width="170" fill="none" filter="url(#violet-blur)" opacity="0.78">
+    <animate attributeName="d"
+      values="M-220 260 C 220 620, 520 80, 900 440 S 1440 840, 1800 520;
+              M-220 300 C 260 660, 560 120, 940 470 S 1480 800, 1800 480;
+              M-220 260 C 220 620, 520 80, 900 440 S 1440 840, 1800 520"
+      dur="15s" repeatCount="indefinite"/>
+  </path>
+  <path d="M-200 250 C 240 610, 540 70, 920 430 S 1460 830, 1800 510"
+        stroke="url(#violet-wave)" stroke-width="10" fill="none" opacity="0.6"/>
+
+  <g fill="#ffffff" opacity="0.7">
+    <circle cx="260" cy="740" r="18"><animate attributeName="cy" values="740;680;740" dur="9s" repeatCount="indefinite"/></circle>
+    <circle cx="620" cy="220" r="12"><animate attributeName="cy" values="220;160;220" dur="7s" repeatCount="indefinite"/></circle>
+    <circle cx="1010" cy="620" r="22"><animate attributeName="cy" values="620;560;620" dur="11s" repeatCount="indefinite"/></circle>
+    <circle cx="1390" cy="300" r="14"><animate attributeName="cy" values="300;240;300" dur="8s" repeatCount="indefinite"/></circle>
+  </g>
+  <g fill="none" stroke="#f5d0fe" stroke-opacity="0.28" stroke-width="3">
+    <circle cx="1180" cy="220" r="150">
+      <animate attributeName="r" values="130;170;130" dur="12s" repeatCount="indefinite"/>
+      <animate attributeName="stroke-opacity" values="0.35;0.05;0.35" dur="12s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="1180" cy="220" r="230">
+      <animate attributeName="r" values="210;250;210" dur="16s" repeatCount="indefinite"/>
+      <animate attributeName="stroke-opacity" values="0.18;0.04;0.18" dur="16s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+</svg>

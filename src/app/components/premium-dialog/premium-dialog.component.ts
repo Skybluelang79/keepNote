@@ -2,12 +2,15 @@ import { Component, computed, inject } from '@angular/core';
 import { AppIcon } from '../app-icon/app-icon.component';
 import {
   BACKGROUNDS,
+  PLAN_FEATURES,
+  PREMIUM_FEATURES,
   BackgroundId,
+  PremiumFeature,
   PremiumPlan,
   isBackgroundPremium,
 } from '../../models/premium.model';
 import { PremiumService } from '../../services/premium.service';
-import { ThemeService } from '../../services/theme.service';
+import { AccentId, ACCENTS, ThemeService } from '../../services/theme.service';
 
 @Component({
   selector: 'premium-dialog',
@@ -61,6 +64,14 @@ import { ThemeService } from '../../services/theme.service';
             >
               Backgrounds
             </button>
+            <button
+              type="button"
+              role="tab"
+              [class.active]="premium.tab() === 'features'"
+              (click)="premium.tab.set('features')"
+            >
+              Features
+            </button>
           </div>
 
           @if (premium.tab() === 'plans') {
@@ -71,9 +82,21 @@ import { ThemeService } from '../../services/theme.service';
                     <strong>Premium is active</strong>
                     <span>{{ planLabel() }} · {{ sourceLabel() }}</span>
                   </div>
-                  <button type="button" class="soft-btn" (click)="premium.open('backgrounds')">
-                    Pick a background
-                  </button>
+                  <div class="banner-actions">
+                    @if (premium.state().source === 'stripe' && premium.state().customerId) {
+                      <button
+                        type="button"
+                        class="soft-btn"
+                        [disabled]="premium.busy()"
+                        (click)="premium.manageSubscription()"
+                      >
+                        Manage billing
+                      </button>
+                    }
+                    <button type="button" class="soft-btn" (click)="premium.open('backgrounds')">
+                      Pick a background
+                    </button>
+                  </div>
                 </div>
               }
 
@@ -86,6 +109,11 @@ import { ThemeService } from '../../services/theme.service';
                     <h3>{{ plan.name }}</h3>
                     <div class="price"><strong>{{ plan.price }}</strong><span>/ {{ plan.period }}</span></div>
                     <p>{{ plan.description }}</p>
+                    <ul class="plan-features">
+                      @for (feature of planFeatureNames(plan.id); track feature) {
+                        <li><span>✓</span>{{ feature }}</li>
+                      }
+                    </ul>
                     <button
                       type="button"
                       class="plan-btn"
@@ -121,7 +149,7 @@ import { ThemeService } from '../../services/theme.service';
                 </div>
               </div>
             </div>
-          } @else {
+          } @else if (premium.tab() === 'backgrounds') {
             <div class="panel-body backgrounds-body">
               <p class="body-intro">
                 Set the mood behind your notes. Free backgrounds work for everyone; premium scenes
@@ -150,6 +178,56 @@ import { ThemeService } from '../../services/theme.service';
                 }
               </div>
             </div>
+          } @else {
+            <div class="panel-body features-body">
+              <p class="body-intro">
+                Premium changes how KeepNote works, not just how it looks. Both paid plans unlock the
+                studio effects and an ad-free workspace; yearly adds note version history.
+              </p>
+
+              <div class="feature-list">
+                @for (feature of featureCatalog; track feature.id) {
+                  <article class="feature-card" [class.live]="hasFeature(feature.id)">
+                    <div class="feature-icon">{{ hasFeature(feature.id) ? '✓' : '✦' }}</div>
+                    <div class="feature-copy">
+                      <div class="feature-title">
+                        <strong>{{ feature.name }}</strong>
+                        <span>{{ feature.badge }}</span>
+                      </div>
+                      <p>{{ feature.description }}</p>
+                    </div>
+                  </article>
+                }
+              </div>
+
+              <div class="accent-section">
+                <div class="accent-head">
+                  <div>
+                    <strong>Accent themes</strong>
+                    <span>Recolor the app controls and highlights.</span>
+                  </div>
+                  @if (!hasFeature('accent-themes')) {
+                    <button type="button" class="text-btn" (click)="premium.open('plans')">
+                      Unlock
+                    </button>
+                  }
+                </div>
+                <div class="accent-grid">
+                  @for (accent of accents; track accent.id) {
+                    <button
+                      type="button"
+                      class="accent-card"
+                      [class.active]="activeAccent() === accent.id"
+                      [class.locked]="!hasFeature('accent-themes')"
+                      (click)="chooseAccent(accent.id)"
+                    >
+                      <span class="accent-swatch" [style.background]="accent.swatch"></span>
+                      <span>{{ accent.name }}</span>
+                    </button>
+                  }
+                </div>
+              </div>
+            </div>
           }
 
           <div class="panel-foot">
@@ -166,6 +244,9 @@ export class PremiumDialog {
   protected readonly theme = inject(ThemeService);
   protected readonly backgrounds = BACKGROUNDS;
   protected readonly activeBackground = computed(() => this.theme.effectiveBackground());
+  protected readonly featureCatalog = PREMIUM_FEATURES;
+  protected readonly accents = ACCENTS;
+  protected readonly activeAccent = computed(() => this.theme.accent());
   protected readonly plans: Array<{
     id: PremiumPlan;
     name: string;
@@ -205,6 +286,27 @@ export class PremiumDialog {
     }
     this.theme.setBackground(id);
     this.premium.notice.set(`${option.name} background applied.`);
+  }
+
+  planFeatureNames(plan: PremiumPlan): string[] {
+    return PLAN_FEATURES[plan]
+      .map((id) => PREMIUM_FEATURES.find((feature) => feature.id === id)?.name)
+      .filter((name): name is string => !!name);
+  }
+
+  hasFeature(feature: PremiumFeature): boolean {
+    return this.premium.hasFeature(feature);
+  }
+
+  chooseAccent(id: AccentId): void {
+    if (!this.hasFeature('accent-themes')) {
+      this.premium.notice.set('Accent themes are included with KeepNote Premium.');
+      this.premium.open('plans');
+      return;
+    }
+    this.theme.setAccent(id);
+    const accent = ACCENTS.find((option) => option.id === id);
+    this.premium.notice.set(`${accent?.name ?? 'Custom'} accent applied.`);
   }
 
   planLabel(): string {

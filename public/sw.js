@@ -1,4 +1,4 @@
-const CACHE = 'keepnote-v7';
+const CACHE = 'keepnote-v8';
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -13,6 +13,10 @@ self.addEventListener('install', (event) => {
           './bg-peak.svg',
           './bg-aurora.svg',
           './bg-marble.svg',
+          './bg-nebula.svg',
+          './bg-violet.svg',
+          './bg-neon.svg',
+          './bg-amber.svg',
         ]),
       )
       .then(() => self.skipWaiting()),

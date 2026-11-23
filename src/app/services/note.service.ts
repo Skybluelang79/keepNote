@@ -1,6 +1,7 @@
-import { Injectable, computed, signal } from '@angular/core';
+import { Injectable, computed, inject, signal } from '@angular/core';
 import { Note } from '../models/note.model';
 import { addChecklistItem, parseChecklist, setChecklistItem } from '../models/note.model';
+import { PremiumService } from './premium.service';
 
 export type View = 'notes' | 'archive' | 'trash';
 export type SortMode = 'updated' | 'created' | 'az';
@@ -12,10 +13,18 @@ export interface ToastState {
   action?: () => void;
 }
 
+export interface NoteVersion {
+  id: string;
+  noteId: string;
+  savedAt: number;
+  note: Note;
+}
+
 const NOTES_KEY = 'keepnote.notes.v1';
 const LABELS_KEY = 'keepnote.labels.v1';
 const SORT_KEY = 'keepnote.sort.v1';
 const LAYOUT_KEY = 'keepnote.layout.v1';
+const HISTORY_KEY = 'keepnote.history.v1';
 
 const SEED_NOTES = seedNotes();
 const SEED_IDS = new Set(SEED_NOTES.map((n) => n.id));
@@ -74,6 +83,14 @@ function loadLayout(): LayoutMode {
     /* ignore */
   }
   return 'cards';
+}
+
+function loadHistory(): NoteVersion[] {
+  try {
+    const raw = localStorage.getItem(HISTORY_KEY);
+    if (raw) return JSON.parse(raw) as NoteVersion[];
+  } catch {}
+  return [];
 }
 
 function bySort(mode: SortMode): (a: Note, b: Note) => number {
@@ -157,6 +174,7 @@ function seedNotes(): Note[] {
 @Injectable({ providedIn: 'root' })
 export class NotesService {
   readonly notes = signal<Note[]>(loadNotes());
+  readonly history = signal<NoteVersion[]>(loadHistory());
   readonly labels = signal<string[]>(loadLabels());
   readonly view = signal<View>('notes');
   readonly query = signal('');
@@ -173,6 +191,7 @@ export class NotesService {
   readonly focusMode = signal(false);
 
   private toastTimer: ReturnType<typeof setTimeout> | null = null;
+  private readonly premium = inject(PremiumService);
 
   readonly editingNote = computed(() => {
     const id = this.editingId();
@@ -299,10 +318,47 @@ export class NotesService {
   }
 
   updateNote(id: string, patch: Partial<Note>): void {
+    if (this.premium.hasFeature('note-history')) this.captureVersion(id);
     this.notes.update((list) =>
       list.map((n) => (n.id === id ? { ...n, ...patch, updatedAt: Date.now() } : n)),
     );
     this.persist();
+  }
+
+  noteVersions(id: string): NoteVersion[] {
+    return this.history()
+      .filter((version) => version.noteId === id)
+      .slice(0, 12);
+  }
+
+  restoreVersion(id: string, versionId: string): void {
+    const version = this.history().find((item) => item.noteId === id && item.id === versionId);
+    if (!version) return;
+    this.notes.update((list) =>
+      list.map((note) =>
+        note.id === id ? { ...version.note, id, updatedAt: Date.now() } : note,
+      ),
+    );
+    this.persist();
+    this.showToast('Earlier version restored');
+  }
+
+  private captureVersion(id: string): void {
+    const current = this.notes().find((note) => note.id === id);
+    if (!current) return;
+    const existing = this.history();
+    const last = existing.find((version) => version.noteId === id);
+    if (last && Date.now() - last.savedAt < 15_000) return;
+    const version: NoteVersion = {
+      id: uid(),
+      noteId: id,
+      savedAt: Date.now(),
+      note: { ...current, labels: [...current.labels] },
+    };
+    this.history.set([version, ...existing].slice(0, 60));
+    try {
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(this.history()));
+    } catch {}
   }
 
   deleteNote(id: string): void {

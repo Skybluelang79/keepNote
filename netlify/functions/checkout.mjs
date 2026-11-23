@@ -35,6 +35,16 @@ async function stripe(path, secret, init = {}) {
   return data;
 }
 
+function idOf(value) {
+  if (!value) return null;
+  return typeof value === 'string' ? value : value.id || null;
+}
+
+function planFeatures(plan) {
+  const shared = 'studio-backgrounds,ad-free,accent-themes';
+  return plan === 'yearly' ? `${shared},note-history` : shared;
+}
+
 function safeUrl(value, fallback) {
   try {
     const url = new URL(value);
@@ -77,7 +87,9 @@ export const handler = async (event) => {
         success_url: successUrl,
         cancel_url: cancelUrl,
         'metadata[plan]': plan,
+        'metadata[features]': planFeatures(plan),
         'subscription_data[metadata][plan]': plan,
+        'subscription_data[metadata][features]': planFeatures(plan),
         allow_promotion_codes: 'true',
       });
 
@@ -122,6 +134,8 @@ export const handler = async (event) => {
         plan: session.metadata?.plan === 'yearly' ? 'yearly' : 'monthly',
         expiresAt,
         sessionId: session.id,
+        customer: idOf(session.customer),
+        subscription: idOf(session.subscription),
       });
     }
 
